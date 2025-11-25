@@ -1,6 +1,10 @@
 
 import asyncio
-from dataclasses import dataclass, field
+import json
+import os
+from dataclasses import dataclass, field, asdict
+from textwrap import dedent
+
 
 @dataclass
 class Room:
@@ -9,34 +13,98 @@ class Room:
     description: str
     exits: dict = field(default_factory=dict)
 
+
 @dataclass
 class Player:
     name: str
     room: str
     writer: asyncio.StreamWriter
+    profile: "PlayerProfile"
+
+
+@dataclass
+class PlayerProfile:
+    level: int = 1
+    race: str = "Human"
+    inventory: list = field(default_factory=lambda: ["Traveler's cloak", "Rusty dagger"])
+    skills: dict = field(default_factory=lambda: {"Perception": 1, "Endurance": 1})
+
 
 class MudServer:
+    """A tiny two-player-friendly fantasy MUD server for LAN play."""
+
     def __init__(self, host="0.0.0.0", port=5000):
+        # 0.0.0.0 allows connections from the local network.
         self.host = host
         self.port = port
         self.rooms = self._create_world()
         self.players = {}  # writer -> Player
+        self.profile_dir = os.path.join(os.path.dirname(__file__), "players")
+        os.makedirs(self.profile_dir, exist_ok=True)
 
     def _create_world(self):
-        # Simple 2-room world
-        room1 = Room(
-            key="start",
-            name="Starting Room",
-            description="You are in a small stone room. Exits: east.",
-            exits={"east": "hall"}
+        """Define a handful of linked rooms for quick exploration."""
+
+        town_square = Room(
+            key="square",
+            name="Town Square",
+            description=(
+                "Lanterns flicker against stone walls. Exits lead north to the market "
+                "and east toward the guild hall."
+            ),
+            exits={"north": "market", "east": "hall"},
         )
-        room2 = Room(
+
+        market = Room(
+            key="market",
+            name="Moonlit Market",
+            description=(
+                "Merchants hawk wares beneath fluttering banners. A path returns south "
+                "to the square or west into a shadowy alley."
+            ),
+            exits={"south": "square", "west": "alley"},
+        )
+
+        guild_hall = Room(
             key="hall",
-            name="Hallway",
-            description="A narrow hallway. Exits: west.",
-            exits={"west": "start"}
+            name="Adventurers' Guild Hall",
+            description=(
+                "A roaring hearth warms tired travelers. The square lies west; a "
+                "staircase climbs up to a quiet balcony."
+            ),
+            exits={"west": "square", "up": "balcony"},
         )
-        return {room1.key: room1, room2.key: room2}
+
+        balcony = Room(
+            key="balcony",
+            name="Guild Balcony",
+            description=(
+                "You overlook the market from here. The only way is back down."
+            ),
+            exits={"down": "hall"},
+        )
+
+        alley = Room(
+            key="alley",
+            name="Shadowed Alley",
+            description=(
+                "The alley smells of rain and secrets. Faint light glows to the east; "
+                "a narrow passage heads north."),
+            exits={"east": "market", "north": "shrine"},
+        )
+
+        shrine = Room(
+            key="shrine",
+            name="Glimmering Shrine",
+            description=(
+                "Moonlight pours through a broken roof, illuminating an ancient shrine. "
+                "The alley lies back south."
+            ),
+            exits={"south": "alley"},
+        )
+
+        rooms = [town_square, market, guild_hall, balcony, alley, shrine]
+        return {room.key: room for room in rooms}
 
     async def start(self):
         server = await asyncio.start_server(
@@ -55,10 +123,15 @@ class MudServer:
         await writer.drain()
 
         name = (await reader.readline()).decode().strip() or "Anonymous"
-        player = Player(name=name, room="start", writer=writer)
+        profile = self._load_profile(name)
+        player = Player(name=name, room="square", writer=writer, profile=profile)
         self.players[writer] = player
 
         await self.show_room(player)
+        await self.broadcast_global(
+            f"{player.name} (Lvl {player.profile.level} {player.profile.race}) has connected.\n",
+            exclude=player,
+        )
 
         try:
             while True:
@@ -73,7 +146,9 @@ class MudServer:
             pass
         finally:
             print(f"{player.name} disconnected")
+            self._save_profile(player)
             del self.players[writer]
+            await self.broadcast_global(f"{player.name} has left the realm.\n")
             writer.close()
             await writer.wait_closed()
 
@@ -82,6 +157,7 @@ class MudServer:
         text = (
             f"\n{room.name}\n"
             f"{room.description}\n"
+            f"Exits: {', '.join(room.exits.keys()) or 'none'}\n"
         )
         await self.send_to_player(player, text)
 
@@ -94,6 +170,11 @@ class MudServer:
             if p.room == room_key and p is not exclude:
                 await self.send_to_player(p, message)
 
+    async def broadcast_global(self, message, exclude=None):
+        for p in self.players.values():
+            if p is not exclude:
+                await self.send_to_player(p, message)
+
     async def process_command(self, player, command):
         if not command:
             return
@@ -102,7 +183,10 @@ class MudServer:
         verb = parts[0].lower()
         arg = parts[1] if len(parts) > 1 else ""
 
-        if verb in ("look", "l"):
+        if verb in ("help", "h", "?"):
+            await self.send_to_player(player, self._help_text())
+
+        elif verb in ("look", "l"):
             await self.show_room(player)
 
         elif verb == "say":
@@ -116,9 +200,37 @@ class MudServer:
             )
             await self.send_to_player(player, f"You say: {arg}\n")
 
-        elif verb in ("north", "south", "east", "west", "n", "s", "e", "w"):
-            direction = verb[0]  # n/s/e/w
-            dir_map = {"n": "north", "s": "south", "e": "east", "w": "west"}
+        elif verb == "emote":
+            if not arg:
+                await self.send_to_player(player, "Emote what?\n")
+                return
+            await self.broadcast_room(
+                player.room,
+                f"* {player.name} {arg}\n",
+                exclude=player,
+            )
+            await self.send_to_player(player, f"* You {arg}\n")
+
+        elif verb == "who":
+            names = [
+                f"{p.name} (Lvl {p.profile.level} {p.profile.race})"
+                for p in self.players.values()
+            ]
+            await self.send_to_player(
+                player,
+                "Connected players: " + (", ".join(names) if names else "none") + "\n",
+            )
+
+        elif verb in ("north", "south", "east", "west", "up", "down", "n", "s", "e", "w", "u", "d"):
+            direction = verb[0]  # n/s/e/w/u/d
+            dir_map = {
+                "n": "north",
+                "s": "south",
+                "e": "east",
+                "w": "west",
+                "u": "up",
+                "d": "down",
+            }
             direction = dir_map.get(direction, direction)
 
             current_room = self.rooms[player.room]
@@ -135,12 +247,72 @@ class MudServer:
             else:
                 await self.send_to_player(player, "You can't go that way.\n")
 
+        elif verb in ("sheet", "profile"):
+            profile = player.profile
+            skills = ", ".join(f"{k} {v}" for k, v in profile.skills.items()) or "none"
+            inventory = ", ".join(profile.inventory) or "empty"
+            text = dedent(
+                f"""
+                {player.name}'s Tale
+                  Level: {profile.level}
+                  Race: {profile.race}
+                  Skills: {skills}
+                  Inventory: {inventory}
+                """
+            )
+            await self.send_to_player(player, text)
+
         elif verb == "quit":
             await self.send_to_player(player, "Goodbye!\n")
             player.writer.close()
 
         else:
             await self.send_to_player(player, "Unknown command.\n")
+
+    def _profile_path(self, player_name):
+        safe_name = player_name.replace("/", "_")
+        return os.path.join(self.profile_dir, f"{safe_name}.json")
+
+    def _load_profile(self, player_name):
+        path = self._profile_path(player_name)
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                return PlayerProfile(**data)
+            except (OSError, json.JSONDecodeError, TypeError):
+                # Fall back to defaults if the file is corrupted.
+                pass
+        profile = PlayerProfile()
+        self._write_profile(path, profile)
+        return profile
+
+    def _save_profile(self, player):
+        path = self._profile_path(player.name)
+        self._write_profile(path, player.profile)
+
+    def _write_profile(self, path, profile):
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(asdict(profile), f, indent=2)
+        except OSError:
+            print(f"Failed to save profile to {path}")
+
+    def _help_text(self):
+        return dedent(
+            """
+            Commands:
+              look/l           Show your current room.
+              say <message>    Chat with players in your room.
+              emote <action>   Perform an action (emote) to the room.
+              who              List connected players.
+              sheet/profile    View your character sheet.
+              n,s,e,w,u,d      Move between rooms.
+              quit             Leave the server.
+
+            Connect from another machine on your LAN using: telnet <host> 5000
+            """
+        )
 
 if __name__ == "__main__":
     asyncio.run(MudServer().start())
