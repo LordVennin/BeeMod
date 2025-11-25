@@ -1,6 +1,8 @@
 
 import asyncio
-from dataclasses import dataclass, field
+import json
+import os
+from dataclasses import dataclass, field, asdict
 from textwrap import dedent
 
 
@@ -17,6 +19,15 @@ class Player:
     name: str
     room: str
     writer: asyncio.StreamWriter
+    profile: "PlayerProfile"
+
+
+@dataclass
+class PlayerProfile:
+    level: int = 1
+    race: str = "Human"
+    inventory: list = field(default_factory=lambda: ["Traveler's cloak", "Rusty dagger"])
+    skills: dict = field(default_factory=lambda: {"Perception": 1, "Endurance": 1})
 
 
 class MudServer:
@@ -28,6 +39,8 @@ class MudServer:
         self.port = port
         self.rooms = self._create_world()
         self.players = {}  # writer -> Player
+        self.profile_dir = os.path.join(os.path.dirname(__file__), "players")
+        os.makedirs(self.profile_dir, exist_ok=True)
 
     def _create_world(self):
         """Define a handful of linked rooms for quick exploration."""
@@ -110,11 +123,15 @@ class MudServer:
         await writer.drain()
 
         name = (await reader.readline()).decode().strip() or "Anonymous"
-        player = Player(name=name, room="square", writer=writer)
+        profile = self._load_profile(name)
+        player = Player(name=name, room="square", writer=writer, profile=profile)
         self.players[writer] = player
 
         await self.show_room(player)
-        await self.broadcast_global(f"{player.name} has connected.\n", exclude=player)
+        await self.broadcast_global(
+            f"{player.name} (Lvl {player.profile.level} {player.profile.race}) has connected.\n",
+            exclude=player,
+        )
 
         try:
             while True:
@@ -129,6 +146,7 @@ class MudServer:
             pass
         finally:
             print(f"{player.name} disconnected")
+            self._save_profile(player)
             del self.players[writer]
             await self.broadcast_global(f"{player.name} has left the realm.\n")
             writer.close()
@@ -194,7 +212,10 @@ class MudServer:
             await self.send_to_player(player, f"* You {arg}\n")
 
         elif verb == "who":
-            names = [p.name for p in self.players.values()]
+            names = [
+                f"{p.name} (Lvl {p.profile.level} {p.profile.race})"
+                for p in self.players.values()
+            ]
             await self.send_to_player(
                 player,
                 "Connected players: " + (", ".join(names) if names else "none") + "\n",
@@ -226,12 +247,56 @@ class MudServer:
             else:
                 await self.send_to_player(player, "You can't go that way.\n")
 
+        elif verb in ("sheet", "profile"):
+            profile = player.profile
+            skills = ", ".join(f"{k} {v}" for k, v in profile.skills.items()) or "none"
+            inventory = ", ".join(profile.inventory) or "empty"
+            text = dedent(
+                f"""
+                {player.name}'s Tale
+                  Level: {profile.level}
+                  Race: {profile.race}
+                  Skills: {skills}
+                  Inventory: {inventory}
+                """
+            )
+            await self.send_to_player(player, text)
+
         elif verb == "quit":
             await self.send_to_player(player, "Goodbye!\n")
             player.writer.close()
 
         else:
             await self.send_to_player(player, "Unknown command.\n")
+
+    def _profile_path(self, player_name):
+        safe_name = player_name.replace("/", "_")
+        return os.path.join(self.profile_dir, f"{safe_name}.json")
+
+    def _load_profile(self, player_name):
+        path = self._profile_path(player_name)
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                return PlayerProfile(**data)
+            except (OSError, json.JSONDecodeError, TypeError):
+                # Fall back to defaults if the file is corrupted.
+                pass
+        profile = PlayerProfile()
+        self._write_profile(path, profile)
+        return profile
+
+    def _save_profile(self, player):
+        path = self._profile_path(player.name)
+        self._write_profile(path, player.profile)
+
+    def _write_profile(self, path, profile):
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(asdict(profile), f, indent=2)
+        except OSError:
+            print(f"Failed to save profile to {path}")
 
     def _help_text(self):
         return dedent(
@@ -241,6 +306,7 @@ class MudServer:
               say <message>    Chat with players in your room.
               emote <action>   Perform an action (emote) to the room.
               who              List connected players.
+              sheet/profile    View your character sheet.
               n,s,e,w,u,d      Move between rooms.
               quit             Leave the server.
 
