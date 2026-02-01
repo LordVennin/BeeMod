@@ -1,3 +1,4 @@
-displayName = Vennin&#39;s Bee Mod
+displayName = Vennin's Bee Mod
 author = Vennin
+
 version = 0.1
