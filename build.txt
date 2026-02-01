@@ -1,0 +1,3 @@
+displayName = Vennin&#39;s Bees
+author = Vennin
+version = 0.1
