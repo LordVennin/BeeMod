@@ -1,0 +1,192 @@
+Items: {
+	StingerLance: {
+		DisplayName: Hive Lance
+		Tooltip: Hold left click to shake out bees. Right click thrusts the hive forward.
+	}
+
+	HoneyDripperWand: {
+		DisplayName: Honey Dripper Wand
+		Tooltip: Fires sticky honey globs that heal.
+	}
+
+	BeeSwarmComb: {
+		DisplayName: Bee Swarm Comb
+		Tooltip: Spawns a small bee minion.
+	}
+
+	QueensGuardCuirass: {
+		DisplayName: Queens Guard Cuirass
+		Tooltip: 5% increased melee damage.
+	}
+
+	QueensGuardGreaves: {
+		DisplayName: Queens Guard Greaves
+		Tooltip: 5% increased melee damage.
+	}
+
+	QueensGuardMask: {
+		DisplayName: Queens Guard Mask
+		Tooltip: 4% increased melee critical strike chance.
+	}
+
+	HivepiercerHood: {
+		DisplayName: Hivepiercer Hood
+		Tooltip: 6% increased ranged critical strike chance.
+	}
+
+	HivepiercerShell: {
+		DisplayName: Hivepiercer Shell
+		Tooltip: 6% increased ranged damage.
+	}
+
+	HivepiercerTarsi: {
+		DisplayName: Hivepiercer Tarsi
+		Tooltip: 10% increased movement speed
+	}
+
+	WaxweaverCowl: {
+		DisplayName: Waxweaver Cowl
+		Tooltip: 6% increased magic critical strike chance.
+	}
+
+	WaxweaverMantle: {
+		DisplayName: Waxweaver Mantle
+		Tooltip:
+			'''
+			6% increased magic damage.
+			Increases maximum mana by 20.
+			'''
+	}
+
+	WaxweaverSlippers: {
+		DisplayName: Waxweaver Slippers
+		Tooltip: Increases maximum mana by 20.
+	}
+
+	Projectiles: {
+		StingerLanceProjectile.DisplayName: Stinger Lance Projectile
+		StingerBeeShakerProjectile.DisplayName: Stinger Bee Shaker Projectile
+
+		HoneyGlobProjectile: {
+			Displayname: Honey Glob
+			DisplayName: Honey Glob Projectile
+		}
+
+		BeeFollowerMinion.DisplayName: Bee Follower Minion
+		HiveHornetMinion.DisplayName: Hive Hornet Minion
+		BeeTrail.DisplayName: Bee Trail
+	}
+
+	Buffs: {
+		BeeSwarmBuff: {
+			DisplayName: Bee Swarm Buff
+			Description: A swarm of bees follows you!
+		}
+
+		QueensHoney: {
+			DisplayName: Queens Honey
+			Description: Huge life regeneration.
+		}
+
+		HiveMindBuff: {
+			DisplayName: Hive Mind Buff
+			Description: A large bee helps you shoot!
+		}
+	}
+
+	StickyResin: {
+		DisplayName: Sticky Resin
+		Tooltip: Used to make bee related items.
+	}
+
+	StickyTwigWand: {
+		DisplayName: Sticky Twig Wand
+		Tooltip: Shoot a stream of honey that can heal friends.
+	}
+
+	PocketBees: {
+		DisplayName: Pocket Bees
+		Tooltip: Throw a bunch of bees?
+	}
+
+	HiveballFlail: {
+		DisplayName: Hiveball Flail
+		Tooltip: Sling a whole hive!
+	}
+
+	MakeshiftHiveStaff: {
+		DisplayName: Makeshift Hive Staff
+		Tooltip: Creates a bee hive turret.
+	}
+
+	RoyalHoneyBrooch: {
+		DisplayName: Royal Honey Brooch
+		Tooltip: Create a healing bee at 1/2 HP.
+	}
+
+	RoyalHoneySigil: {
+		DisplayName: Royal Honey Sigil
+		Tooltip: Create healing bee circle at 1/2 HP.
+	}
+
+	HoneyFangBlade: {
+		DisplayName: Honey Fang Blade
+		Tooltip: ""
+	}
+
+	StingerBlowpipe: {
+		DisplayName: Stinger Blowpipe
+		Tooltip: ""
+	}
+
+	HoneyflowCharm: {
+		DisplayName: Honeyflow Charm
+		Tooltip:
+			'''
+			Move through honey at normal speeds.
+			1 life regeneration.
+			'''
+	}
+}
+
+Buffs: {
+	BeeSwarmBuff: {
+		DisplayName: Bee Swarm Buff
+		Description: A bee follows you.
+	}
+
+	HiveMindBuff: {
+		DisplayName: Hive Mind Buff
+		Description: A bee follows you and mimics your attacks.
+	}
+
+	QueensHoney: {
+		DisplayName: Queens Honey
+		Description: Massive life regeneration.
+	}
+}
+
+Projectiles: {
+	BeeFollowerMinion.DisplayName: Bee Follower Minion
+	BeeTrail.DisplayName: Bee Trail
+	HiveHornetMinion.DisplayName: Hive Hornet Minion
+	HoneyGlobProjectile.DisplayName: Honey Glob Projectile
+	StingerBeeShakerProjectile.DisplayName: Stinger Bee Shaker Projectile
+	StingerLanceProjectile.DisplayName: Stinger Lance Projectile
+	FallingHiveProjectile.DisplayName: Falling Hive Projectile
+	TreeHiveProjectile.DisplayName: Tree Hive Projectile
+	StickyHoneySprayProjectile.DisplayName: Sticky Honey Spray Projectile
+	PocketBeeProjectile.DisplayName: Pocket Bee Projectile
+	HornetStingerProjectile.DisplayName: Hornet Stinger Projectile
+	HiveballProjectile.DisplayName: Hiveball Projectile
+	SpinningHiveballProjectile.DisplayName: Spinning Hiveball Projectile
+	ThrownHiveballProjectile.DisplayName: Thrown Hiveball Projectile
+	HiveTurret.DisplayName: Hive Turret
+	HealingBee.DisplayName: Healing Bee
+	RoyalBeeOrbiter.DisplayName: Royal Bee Orbiter
+	HoneySlashProjectile.DisplayName: Honey Slash Projectile
+}
+
+Mods.VenninBeeMod.Tiles.FallingTreeHiveTile.MapEntry: Falling Tree Hive
+Tiles.TreeHiveTile.MapEntry: Tree Hive Tile
+NPCs.StickyResinBee.DisplayName: Sticky Resin Bee
