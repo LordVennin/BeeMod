@@ -168,6 +168,10 @@ namespace VenninBeeMod.Content.NPCs
             NPC.spriteDirection = NPC.direction = (NPC.velocity.X > 0).ToDirectionInt();
         }
 
+        public override void ModifyHitPlayer(Player target, ref Player.HurtModifiers modifiers)
+        {
+            modifiers.Knockback *= 0f;
+        }
 
 
         public override void OnKill()
