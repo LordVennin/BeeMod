@@ -16,6 +16,7 @@ namespace VenninBeeMod.Content.Items
         public override void SetStaticDefaults()
         {
             Item.ResearchUnlockCount = 1;
+            Tooltip.SetDefault("shoots stingers");
         }
 
         public override void SetDefaults()
