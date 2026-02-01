@@ -61,7 +61,7 @@ namespace VenninBeeMod.Content.Buffs
                         Vector2 shootDirection = (Main.MouseWorld - hornet.Center).SafeNormalize(Vector2.UnitX);
                         Vector2 spawnOffset = shootDirection * 6f + new Vector2(0f, 4f); // 4 pixels lower
                         Vector2 spawnPosition = hornet.Center + spawnOffset;
-                        int damage = (int)(player.GetWeaponDamage(heldItem) * 0.7f);
+                        int damage = (int)(player.GetWeaponDamage(heldItem) * 0.9f);
 
 
                         Projectile.NewProjectile(
@@ -80,4 +80,5 @@ namespace VenninBeeMod.Content.Buffs
             }
         }
     }
+
 }
