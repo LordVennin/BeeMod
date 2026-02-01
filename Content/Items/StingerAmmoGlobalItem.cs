@@ -11,6 +11,7 @@ namespace VenninBeeMod.Content.Items
             if (entity.type == ItemID.Stinger)
             {
                 entity.ammo = ItemID.Stinger;
+                entity.consumable = true;
             }
         }
     }
