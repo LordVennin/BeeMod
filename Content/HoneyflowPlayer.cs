@@ -14,22 +14,15 @@ namespace VenninBeeMod.Content
 
         public override void PreUpdateMovement()
         {
-            if (honeyflowActive && Player.honeyWet)
+            if (!honeyflowActive)
             {
-                Player.ignoreWater = true;
+                return;
+            }
+
+            if (Player.honeyWet)
+            {
                 Player.honeyWet = false;
                 Player.honey = false;
-            }
-        }
-
-        public override void PostUpdateRunSpeeds()
-        {
-            if (honeyflowActive && Player.honeyWet)
-            {
-                Player.ignoreWater = true;
-                Player.maxRunSpeed *= 4f;
-                Player.runAcceleration *= 4f;
-                Player.runSlowdown *= 4f;
             }
         }
     }
