@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
@@ -23,8 +24,14 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override bool PreDraw(ref Color lightColor)
         {
-            // draw projectile normally
-            return true;
+            Texture2D texture = TextureAssets.Projectile[Type].Value;
+            Rectangle source = new Rectangle(SpriteOffsetX, SpriteOffsetY, SpriteWidth, SpriteHeight);
+            Vector2 origin = new Vector2(SpriteWidth / 2f, SpriteHeight / 2f);
+            Vector2 position = Projectile.Center - Main.screenPosition;
+            SpriteEffects effects = Projectile.spriteDirection == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+
+            Main.spriteBatch.Draw(texture, position, source, lightColor, Projectile.rotation, origin, Projectile.scale, effects, 0f);
+            return false;
         }
 
         public override void PostDraw(Color lightColor)
