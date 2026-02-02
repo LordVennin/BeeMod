@@ -19,8 +19,8 @@ namespace VenninBeeMod.Content.Items
             Item.DamageType = DamageClass.Melee;
             Item.width = 44;
             Item.height = 44;
-            Item.useTime = 22;
-            Item.useAnimation = 22;
+            Item.useTime = 30;
+            Item.useAnimation = 30;
             Item.useStyle = ItemUseStyleID.Swing;
             Item.knockBack = 5.5f;
             Item.value = Item.buyPrice(gold: 2);
