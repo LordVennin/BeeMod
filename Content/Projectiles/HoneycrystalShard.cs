@@ -10,23 +10,17 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class HoneycrystalShard : ModProjectile
     {
-        private const int TextureSize = 107;
-        private const int VisibleMinX = 22;
-        private const int VisibleMinY = 9;
-        private const int VisibleWidth = 71;
-        private const int VisibleHeight = 85;
+        private const int BaseSize = 64;
         private const int BurstDelay = 30;
         private const int BeeCount = 3;
         private const float GravityStrength = 0.2f;
-        private const float VisualScale = 0.65f;
+        private const float VisualScale = 1f;
         private const int StickAdjustSteps = 12;
 
         public override void SetDefaults()
         {
-            int hitboxWidth = (int)MathF.Round(VisibleWidth * VisualScale);
-            int hitboxHeight = (int)MathF.Round(VisibleHeight * VisualScale);
-            Projectile.width = hitboxWidth;
-            Projectile.height = hitboxHeight;
+            Projectile.width = BaseSize;
+            Projectile.height = BaseSize;
             Projectile.scale = VisualScale;
             float textureHalfSize = TextureSize * 0.5f * VisualScale;
             float offsetX = -hitboxWidth * 0.5f + textureHalfSize - VisibleMinX * VisualScale;
