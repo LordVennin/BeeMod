@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -7,11 +8,12 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class HoneycrystalShard : ModProjectile
     {
-        private const int BurstDelay = 30;
+        private const int BurstDelay = 120;
         private const int BeeCount = 3;
 		// Trimmed sprite dimensions (pixels)
-		private const int SpriteWidth = 43;
-		private const int SpriteHeight = 52;
+		private const int SpriteWidth = 35;
+		private const int SpriteHeight = 44;
+        private const int ExplodeFlag = 2;
 
         public override void SetDefaults()
         {
@@ -35,13 +37,11 @@ namespace VenninBeeMod.Content.Projectiles
             }
 
             Projectile.velocity = Vector2.Zero;
-            Projectile.rotation += 0.1f;
 
             Projectile.localAI[1]++;
             if (Projectile.localAI[1] >= BurstDelay)
             {
-                SpawnBees();
-                Projectile.Kill();
+                Explode();
             }
         }
 
@@ -57,10 +57,7 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
-            if (Projectile.localAI[0] == 0f)
-            {
-                StickInPlace();
-            }
+            Explode();
         }
 
         private void StickInPlace()
@@ -72,18 +69,24 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.netUpdate = true;
         }
 
-        private void SpawnBees()
+        private void Explode()
         {
-            if (Main.myPlayer != Projectile.owner)
+            if (Projectile.localAI[ExplodeFlag] == 1f)
             {
                 return;
             }
 
-            for (int i = 0; i < BeeCount; i++)
+            Projectile.localAI[ExplodeFlag] = 1f;
+            SoundEngine.PlaySound(SoundID.Item14, Projectile.Center);
+
+            if (Main.myPlayer == Projectile.owner)
             {
-                Vector2 velocity = Main.rand.NextVector2Circular(3f, 3f);
-                int damage = (int)(Projectile.damage * 0.4f);
-                Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, velocity, ProjectileID.Bee, damage, 0f, Projectile.owner);
+                for (int i = 0; i < BeeCount; i++)
+                {
+                    Vector2 velocity = Main.rand.NextVector2Circular(3f, 3f);
+                    int damage = (int)(Projectile.damage * 0.4f);
+                    Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, velocity, ProjectileID.Bee, damage, 0f, Projectile.owner);
+                }
             }
 
             for (int i = 0; i < 8; i++)
@@ -92,6 +95,8 @@ namespace VenninBeeMod.Content.Projectiles
                 Main.dust[dust].velocity *= 1.2f;
                 Main.dust[dust].noGravity = true;
             }
+
+            Projectile.Kill();
         }
     }
 }
