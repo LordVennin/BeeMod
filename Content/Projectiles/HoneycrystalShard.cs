@@ -12,11 +12,14 @@ namespace VenninBeeMod.Content.Projectiles
         private const int BurstDelay = 30;
         private const int BeeCount = 3;
         private const float GravityStrength = 0.2f;
+        private const float VisualScale = 0.65f;
+        private const int StickAdjustSteps = 12;
 
         public override void SetDefaults()
         {
             Projectile.width = 16;
             Projectile.height = 16;
+            Projectile.scale = VisualScale;
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Melee;
             Projectile.penetrate = -1;
@@ -53,7 +56,7 @@ namespace VenninBeeMod.Content.Projectiles
         {
             if (Projectile.localAI[0] == 0f)
             {
-                StickInPlace();
+                StickInPlace(oldVelocity);
             }
 
             return false;
@@ -67,8 +70,26 @@ namespace VenninBeeMod.Content.Projectiles
             }
         }
 
-        private void StickInPlace()
+        private void StickInPlace(Vector2? collisionVelocity = null)
         {
+            if (collisionVelocity.HasValue && collisionVelocity.Value != Vector2.Zero)
+            {
+                Vector2 step = collisionVelocity.Value.SafeNormalize(Vector2.Zero);
+                Vector2 adjustedPosition = Projectile.position;
+
+                for (int i = 0; i < StickAdjustSteps; i++)
+                {
+                    if (!Collision.SolidCollision(adjustedPosition, Projectile.width, Projectile.height))
+                    {
+                        break;
+                    }
+
+                    adjustedPosition -= step;
+                }
+
+                Projectile.position = adjustedPosition;
+            }
+
             Projectile.localAI[0] = 1f;
             Projectile.velocity = Vector2.Zero;
             Projectile.tileCollide = false;
@@ -92,9 +113,16 @@ namespace VenninBeeMod.Content.Projectiles
 
             for (int i = 0; i < 12; i++)
             {
-                int dust = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, DustID.Honey);
-                Main.dust[dust].velocity = Main.rand.NextVector2Circular(2.4f, 2.4f);
-                Main.dust[dust].noGravity = false;
+                Dust dust = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height, DustID.Honey, 0f, 0f, 150, default, 1.2f);
+                dust.velocity = Main.rand.NextVector2Circular(2.4f, 2.4f);
+                dust.noGravity = false;
+            }
+
+            for (int i = 0; i < 8; i++)
+            {
+                Dust dust = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height, DustID.Honey, 0f, 0f, 100, default, 1.4f);
+                dust.velocity = Main.rand.NextVector2Circular(3.2f, 3.2f);
+                dust.noGravity = true;
             }
 
             Projectile.Kill();
