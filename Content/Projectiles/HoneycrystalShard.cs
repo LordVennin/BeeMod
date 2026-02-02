@@ -14,8 +14,8 @@ namespace VenninBeeMod.Content.Projectiles
         private const int BurstDelay = 120;
         private const int BeeCount = 3;
         // Trimmed sprite dimensions and offsets within the texture (pixels).
-        private const int SpriteWidth = 71;
-        private const int SpriteHeight = 85;
+        private const int SpriteWidth = 10;
+        private const int SpriteHeight = 14;
         private const int SpriteOffsetX = 22;
         private const int SpriteOffsetY = 9;
         private const int ExplodeFlag = 2;
@@ -146,8 +146,8 @@ namespace VenninBeeMod.Content.Projectiles
             float textureCenterX = TextureAssets.Projectile[Type].Width() / 2f;
             float textureCenterY = TextureAssets.Projectile[Type].Height() / 2f;
 
-            Projectile.DrawOriginOffsetX = (int)Math.Round(spriteCenterX - textureCenterX);
-            Projectile.DrawOriginOffsetY = (int)Math.Round(spriteCenterY - textureCenterY);
+            DrawOriginOffsetX = (int)Math.Round(spriteCenterX - textureCenterX);
+            DrawOriginOffsetY = (int)Math.Round(spriteCenterY - textureCenterY);
         }
     }
 }
