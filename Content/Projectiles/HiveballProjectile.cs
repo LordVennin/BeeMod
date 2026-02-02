@@ -71,11 +71,6 @@ namespace VenninBeeMod.Content.Projectiles
             else if (Projectile.ai[0] == (float)AIState.LaunchingForward)
             {
                 Projectile.ai[1]++; // frame counter for launch duration
-                if (Projectile.ai[1] == 1f && !player.channel)
-                {
-                    ReleaseFlingBees();
-                }
-
                 if (player.channel)
                 {
                     Projectile.velocity.X *= 0.98f;
@@ -209,22 +204,7 @@ namespace VenninBeeMod.Content.Projectiles
 
             if (Projectile.ai[0] == (float)AIState.LaunchingForward && Main.rand.NextBool(3))
             {
-                int bee = Projectile.NewProjectile(
-                    Projectile.GetSource_FromThis(),
-                    Projectile.Center,
-                    Vector2.UnitY.RotatedByRandom(MathHelper.TwoPi) * 3f,
-                    ProjectileID.Bee,
-                    Projectile.damage / 2,
-                    0f,
-                    Projectile.owner
-                );
-
-                if (Main.projectile.IndexInRange(bee))
-                {
-                    Main.projectile[bee].DamageType = DamageClass.Melee;
-                    Main.projectile[bee].friendly = true;
-                    Main.projectile[bee].hostile = false;
-                }
+                ReleaseFlingBees();
             }
         }
     }
