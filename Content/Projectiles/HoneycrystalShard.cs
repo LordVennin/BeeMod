@@ -21,8 +21,8 @@ namespace VenninBeeMod.Content.Projectiles
         private const int SpriteHeight = 12;
         private const int SpriteOffsetX = 19;
         private const int SpriteOffsetY = 30;
-        private const int ExplodeFlag = 2;
-        private const int RotationInitFlag = 3;
+        private const int ExplodeFlag = 1;
+        private const int RotationInitFlag = 0;
 
 
         public override bool PreDraw(ref Color lightColor)
@@ -65,10 +65,10 @@ namespace VenninBeeMod.Content.Projectiles
         {
             if (Projectile.localAI[0] == 0f)
             {
-                if (Projectile.localAI[RotationInitFlag] == 0f)
+                if (Projectile.ai[RotationInitFlag] == 0f)
                 {
                     Projectile.rotation = Main.rand.NextFloat(MathHelper.TwoPi);
-                    Projectile.localAI[RotationInitFlag] = 1f;
+                    Projectile.ai[RotationInitFlag] = 1f;
                 }
 
                 Projectile.velocity.Y += 0.2f;
@@ -77,8 +77,8 @@ namespace VenninBeeMod.Content.Projectiles
 
             Projectile.velocity = Vector2.Zero;
 
-            Projectile.localAI[1]++;
-            if (Projectile.localAI[1] % CountdownDustInterval == 0f)
+            Projectile.ai[1]++;
+            if (Projectile.ai[1] % CountdownDustInterval == 0f)
             {
                 for (int i = 0; i < CountdownDustCount; i++)
                 {
@@ -88,7 +88,7 @@ namespace VenninBeeMod.Content.Projectiles
                     dust.noGravity = true;
                 }
             }
-            if (Projectile.localAI[1] >= BurstDelay)
+            if (Projectile.ai[1] >= BurstDelay)
             {
                 Explode();
             }
