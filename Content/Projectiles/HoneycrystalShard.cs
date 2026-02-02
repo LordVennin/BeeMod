@@ -9,16 +9,17 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class HoneycrystalShard : ModProjectile
     {
+        private const int TextureSize = 64;
         private const int BurstDelay = 30;
         private const int BeeCount = 3;
         private const float GravityStrength = 0.2f;
-        private const float VisualScale = 0.65f;
+        private const float VisualScale = 1f;
         private const int StickAdjustSteps = 12;
 
         public override void SetDefaults()
         {
-            Projectile.width = 16;
-            Projectile.height = 16;
+            Projectile.width = TextureSize;
+            Projectile.height = TextureSize;
             Projectile.scale = VisualScale;
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Melee;
@@ -30,7 +31,10 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void OnSpawn(IEntitySource source)
         {
-            Projectile.rotation = Main.rand.NextFloat(MathHelper.TwoPi);
+            if (Projectile.velocity.LengthSquared() > 0f)
+            {
+                Projectile.rotation = Projectile.velocity.ToRotation();
+            }
         }
 
         public override void AI()
