@@ -33,7 +33,11 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void OnSpawn(IEntitySource source)
         {
-            Projectile.rotation = Main.rand.NextFloat(MathHelper.TwoPi);
+            Projectile.position -= Projectile.Size * 0.5f;
+            if (Projectile.velocity.LengthSquared() > 0f)
+            {
+                Projectile.rotation = Projectile.velocity.ToRotation();
+            }
         }
 
         public override void AI()
