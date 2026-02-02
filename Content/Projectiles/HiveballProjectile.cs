@@ -202,7 +202,7 @@ namespace VenninBeeMod.Content.Projectiles
         {
             target.AddBuff(BuffID.Honey, 180);
 
-            if (Projectile.ai[0] == (float)AIState.LaunchingForward && Main.rand.NextBool(3))
+            if (Projectile.ai[0] == (float)AIState.LaunchingForward)
             {
                 ReleaseFlingBees();
             }
