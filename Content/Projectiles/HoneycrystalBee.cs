@@ -52,7 +52,7 @@ namespace VenninBeeMod.Content.Projectiles
                 for (int i = 0; i < DustCount; i++)
                 {
                     Vector2 offset = Main.rand.NextVector2Circular(Projectile.width * 0.4f, Projectile.height * 0.4f);
-                    Dust dust = Dust.NewDustPerfect(Projectile.Center + offset, DustID.CrystalShard);
+                    Dust dust = Dust.NewDustPerfect(Projectile.Center + offset, DustID.Honey);
                     dust.velocity = offset.SafeNormalize(Vector2.UnitY) * Main.rand.NextFloat(0.3f, 0.9f);
                     dust.noGravity = true;
                     dust.scale = Main.rand.NextFloat(0.8f, 1.1f);
