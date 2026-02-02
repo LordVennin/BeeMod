@@ -10,7 +10,7 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class HoneycrystalShard : ModProjectile
     {
-        private const int BaseSize = 16;
+        private const int BaseSize = 64;
         private const int BurstDelay = 30;
         private const int BeeCount = 3;
         private const float GravityStrength = 0.2f;
