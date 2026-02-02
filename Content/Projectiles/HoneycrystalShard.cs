@@ -148,7 +148,7 @@ namespace VenninBeeMod.Content.Projectiles
                 {
                     Vector2 velocity = Main.rand.NextVector2Circular(3f, 3f);
                     int damage = (int)(Projectile.damage * 0.4f);
-                    Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, velocity, ProjectileID.Bee, damage, 0f, Projectile.owner);
+                    Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, velocity, ModContent.ProjectileType<HoneycrystalBee>(), damage, 0f, Projectile.owner);
                 }
             }
 
