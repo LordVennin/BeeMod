@@ -64,7 +64,13 @@ namespace VenninBeeMod.Content.Projectiles
         {
             if (Projectile.localAI[0] == 0f)
             {
-                Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
+                if (Projectile.localAI[2] == 0f)
+                {
+                    Projectile.rotation = Main.rand.NextFloat(MathHelper.TwoPi);
+                    Projectile.localAI[2] = 1f;
+                }
+
+                Projectile.velocity.Y += 0.2f;
                 return;
             }
 
