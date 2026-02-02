@@ -14,6 +14,8 @@ namespace VenninBeeMod.Content.Projectiles
     {
         private const int BurstDelay = 120;
         private const int BeeCount = 3;
+        private const int CountdownDustInterval = 6;
+        private const int CountdownDustCount = 2;
         // Trimmed sprite dimensions and offsets within the texture (pixels).
         private const int SpriteWidth = 12;
         private const int SpriteHeight = 12;
@@ -69,6 +71,16 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.velocity = Vector2.Zero;
 
             Projectile.localAI[1]++;
+            if (Projectile.localAI[1] % CountdownDustInterval == 0f)
+            {
+                for (int i = 0; i < CountdownDustCount; i++)
+                {
+                    Vector2 dustOffset = Main.rand.NextVector2CircularEdge(Projectile.width * 0.6f, Projectile.height * 0.6f);
+                    Dust dust = Dust.NewDustPerfect(Projectile.Center + dustOffset, DustID.Honey);
+                    dust.velocity = dustOffset.SafeNormalize(Vector2.UnitY) * Main.rand.NextFloat(0.4f, 1.2f);
+                    dust.noGravity = true;
+                }
+            }
             if (Projectile.localAI[1] >= BurstDelay)
             {
                 Explode();
@@ -126,11 +138,12 @@ namespace VenninBeeMod.Content.Projectiles
                 }
             }
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 20; i++)
             {
                 int dust = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, DustID.Honey);
-                Main.dust[dust].velocity *= 1.2f;
+                Main.dust[dust].velocity = Main.rand.NextVector2Circular(2.4f, 2.4f);
                 Main.dust[dust].noGravity = true;
+                Main.dust[dust].scale = Main.rand.NextFloat(1.1f, 1.6f);
             }
 
             Projectile.Kill();
