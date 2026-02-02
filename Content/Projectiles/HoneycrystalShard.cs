@@ -10,7 +10,7 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class HoneycrystalShard : ModProjectile
     {
-        private const int BaseSize = 64;
+        private const int TextureSize = 64;
         private const int BurstDelay = 30;
         private const int BeeCount = 3;
         private const float GravityStrength = 0.2f;
@@ -19,8 +19,8 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void SetDefaults()
         {
-            Projectile.width = BaseSize;
-            Projectile.height = BaseSize;
+            Projectile.width = TextureSize;
+            Projectile.height = TextureSize;
             Projectile.scale = VisualScale;
             float textureHalfSize = TextureSize * 0.5f * VisualScale;
             float offsetX = -hitboxWidth * 0.5f + textureHalfSize - VisibleMinX * VisualScale;
