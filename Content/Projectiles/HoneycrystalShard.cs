@@ -51,6 +51,8 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.timeLeft = 180;
             Projectile.aiStyle = 0;
             Projectile.tileCollide = true;
+            Projectile.usesLocalNPCImmunity = true;
+            Projectile.localNPCHitCooldown = 10;
         }
 
         public override void OnSpawn(IEntitySource source)
@@ -112,6 +114,11 @@ namespace VenninBeeMod.Content.Projectiles
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            Explode();
+        }
+
+        public override void OnKill(int timeLeft)
         {
             Explode();
         }
