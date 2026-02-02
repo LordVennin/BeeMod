@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
@@ -9,6 +10,11 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class HoneycrystalShard : ModProjectile
     {
+        private const int TextureSize = 107;
+        private const int VisibleMinX = 22;
+        private const int VisibleMinY = 9;
+        private const int VisibleWidth = 71;
+        private const int VisibleHeight = 85;
         private const int BurstDelay = 30;
         private const int BeeCount = 3;
         private const float GravityStrength = 0.2f;
@@ -17,9 +23,16 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void SetDefaults()
         {
-            Projectile.width = 16;
-            Projectile.height = 16;
+            int hitboxWidth = (int)MathF.Round(VisibleWidth * VisualScale);
+            int hitboxHeight = (int)MathF.Round(VisibleHeight * VisualScale);
+            Projectile.width = hitboxWidth;
+            Projectile.height = hitboxHeight;
             Projectile.scale = VisualScale;
+            float textureHalfSize = TextureSize * 0.5f * VisualScale;
+            float offsetX = -hitboxWidth * 0.5f + textureHalfSize - VisibleMinX * VisualScale;
+            float offsetY = -hitboxHeight * 0.5f + textureHalfSize - VisibleMinY * VisualScale;
+            Projectile.DrawOffsetX = (int)MathF.Round(offsetX);
+            Projectile.DrawOriginOffsetY = (int)MathF.Round(offsetY);
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Melee;
             Projectile.penetrate = -1;
@@ -30,7 +43,10 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void OnSpawn(IEntitySource source)
         {
-            Projectile.rotation = Main.rand.NextFloat(MathHelper.TwoPi);
+            if (Projectile.velocity.LengthSquared() > 0f)
+            {
+                Projectile.rotation = Projectile.velocity.ToRotation();
+            }
         }
 
         public override void AI()
