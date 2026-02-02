@@ -15,10 +15,10 @@ namespace VenninBeeMod.Content.Projectiles
         private const int BurstDelay = 120;
         private const int BeeCount = 3;
         // Trimmed sprite dimensions and offsets within the texture (pixels).
-        private const int SpriteWidth = 10;
-        private const int SpriteHeight = 14;
-        private const int SpriteOffsetX = 22;
-        private const int SpriteOffsetY = 9;
+        private const int SpriteWidth = 12;
+        private const int SpriteHeight = 12;
+        private const int SpriteOffsetX = 19;
+        private const int SpriteOffsetY = 30;
         private const int ExplodeFlag = 2;
 
 
@@ -35,18 +35,7 @@ namespace VenninBeeMod.Content.Projectiles
             return false;
         }
 
-        public override void PostDraw(Color lightColor)
-        {
-            // Draw the actual hitbox rectangle the engine uses
-            Rectangle hb = Projectile.Hitbox;
-            hb.Location -= (Main.screenPosition).ToPoint();
 
-            Main.spriteBatch.Draw(
-                TextureAssets.MagicPixel.Value,
-                hb,
-                Color.Red * 0.5f
-            );
-        }
 
         public override void SetDefaults()
         {
