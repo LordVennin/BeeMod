@@ -10,7 +10,7 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class HoneycrystalShard : ModProjectile
     {
-        private const int BaseSize = 64;
+        private const int BaseSize = 107;
         private const int BurstDelay = 30;
         private const int BeeCount = 3;
         private const float GravityStrength = 0.2f;
@@ -33,7 +33,6 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void OnSpawn(IEntitySource source)
         {
-            Projectile.position -= Projectile.Size * 0.5f;
             if (Projectile.velocity.LengthSquared() > 0f)
             {
                 Projectile.rotation = Projectile.velocity.ToRotation();
