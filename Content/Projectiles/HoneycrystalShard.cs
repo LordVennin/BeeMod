@@ -118,6 +118,11 @@ namespace VenninBeeMod.Content.Projectiles
             Explode();
         }
 
+        public override void OnKill(int timeLeft)
+        {
+            Explode();
+        }
+
         private void StickInPlace()
         {
             Projectile.localAI[0] = 1f;
