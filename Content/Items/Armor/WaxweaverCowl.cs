@@ -38,8 +38,8 @@ namespace VenninBeeMod.Content.Items.Armor
 
         public override void UpdateArmorSet(Player player)
         {
-            player.setBonus = "Leaves behind a trail of bees that damage enemies\nIncreases magic damage by 25%";
-            player.GetDamage(DamageClass.Magic) += 0.25f;
+            player.setBonus = "Leaves behind a trail of bees that damage enemies\nIncreases magic damage by 20%";
+            player.GetDamage(DamageClass.Magic) += 0.20f;
             player.GetModPlayer<WaxweaverPlayer>().hasWaxweaverSet = true;
         }
 

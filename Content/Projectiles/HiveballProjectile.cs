@@ -71,6 +71,10 @@ namespace VenninBeeMod.Content.Projectiles
             else if (Projectile.ai[0] == (float)AIState.LaunchingForward)
             {
                 Projectile.ai[1]++; // frame counter for launch duration
+                if (Projectile.ai[1] == 1f)
+                {
+                    ReleaseFlingBees();
+                }
 
                 if (player.channel)
                 {
@@ -109,6 +113,31 @@ namespace VenninBeeMod.Content.Projectiles
             }
 
             Projectile.rotation += 0.3f * (float)Projectile.direction;
+        }
+
+        private void ReleaseFlingBees()
+        {
+            int beeCount = Main.rand.Next(2, 4);
+            for (int i = 0; i < beeCount; i++)
+            {
+                Vector2 velocity = Vector2.UnitY.RotatedByRandom(MathHelper.TwoPi) * Main.rand.NextFloat(3f, 5f);
+                int bee = Projectile.NewProjectile(
+                    Projectile.GetSource_FromThis(),
+                    Projectile.Center,
+                    velocity,
+                    ProjectileID.Bee,
+                    Projectile.damage / 2,
+                    0f,
+                    Projectile.owner
+                );
+
+                if (Main.projectile.IndexInRange(bee))
+                {
+                    Main.projectile[bee].DamageType = DamageClass.Melee;
+                    Main.projectile[bee].friendly = true;
+                    Main.projectile[bee].hostile = false;
+                }
+            }
         }
 
         public override bool OnTileCollide(Vector2 oldVelocity)
