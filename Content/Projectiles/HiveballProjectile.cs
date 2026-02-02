@@ -71,7 +71,7 @@ namespace VenninBeeMod.Content.Projectiles
             else if (Projectile.ai[0] == (float)AIState.LaunchingForward)
             {
                 Projectile.ai[1]++; // frame counter for launch duration
-                if (Projectile.ai[1] == 1f)
+                if (Projectile.ai[1] == 1f && !player.channel)
                 {
                     ReleaseFlingBees();
                 }
@@ -207,7 +207,7 @@ namespace VenninBeeMod.Content.Projectiles
         {
             target.AddBuff(BuffID.Honey, 180);
 
-            if (Main.rand.NextBool(3))
+            if (Projectile.ai[0] == (float)AIState.LaunchingForward && Main.rand.NextBool(3))
             {
                 int bee = Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),
