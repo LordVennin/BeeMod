@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.GameContent;
@@ -39,15 +40,21 @@ namespace VenninBeeMod.Content.Projectiles
         public override void SetDefaults()
         {
 			// Hitbox should match the sprite pixel dimensions.
-			Projectile.width = 1;
-			Projectile.height = 2;
-            Projectile.Resize(1, 2);
+			Projectile.width = SpriteWidth;
+			Projectile.height = SpriteHeight;
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Melee;
             Projectile.penetrate = -1;
             Projectile.timeLeft = 180;
             Projectile.aiStyle = 0;
             Projectile.tileCollide = true;
+        }
+
+        public override void OnSpawn(IEntitySource source)
+        {
+            Vector2 center = Projectile.Center;
+            Projectile.Resize(SpriteWidth, SpriteHeight);
+            Projectile.Center = center;
         }
 
         public override void AI()
@@ -69,8 +76,8 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override bool TileCollideStyle(ref int width, ref int height, ref bool fallThrough, ref Vector2 hitboxCenterFrac)
         {
-            width = 1;
-            height = 2;
+            width = SpriteWidth;
+            height = SpriteHeight;
             return true;
         }
 
