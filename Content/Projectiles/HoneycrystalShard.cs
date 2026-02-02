@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
@@ -21,6 +22,11 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.width = TextureSize;
             Projectile.height = TextureSize;
             Projectile.scale = VisualScale;
+            float textureHalfSize = TextureSize * 0.5f * VisualScale;
+            float offsetX = -hitboxWidth * 0.5f + textureHalfSize - VisibleMinX * VisualScale;
+            float offsetY = -hitboxHeight * 0.5f + textureHalfSize - VisibleMinY * VisualScale;
+            Projectile.DrawOffsetX = (int)MathF.Round(offsetX);
+            Projectile.DrawOriginOffsetY = (int)MathF.Round(offsetY);
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Melee;
             Projectile.penetrate = -1;
