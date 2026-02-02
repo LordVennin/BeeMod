@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
@@ -9,6 +10,7 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class HoneycrystalShard : ModProjectile
     {
+        private const int BaseSize = 107;
         private const int BurstDelay = 30;
         private const int BeeCount = 3;
         private const float GravityStrength = 0.2f;
@@ -17,8 +19,9 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void SetDefaults()
         {
-            Projectile.width = 16;
-            Projectile.height = 16;
+            int scaledSize = (int)MathF.Round(BaseSize * VisualScale);
+            Projectile.width = scaledSize;
+            Projectile.height = scaledSize;
             Projectile.scale = VisualScale;
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Melee;
@@ -30,7 +33,10 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void OnSpawn(IEntitySource source)
         {
-            Projectile.rotation = Main.rand.NextFloat(MathHelper.TwoPi);
+            if (Projectile.velocity.LengthSquared() > 0f)
+            {
+                Projectile.rotation = Projectile.velocity.ToRotation();
+            }
         }
 
         public override void AI()
