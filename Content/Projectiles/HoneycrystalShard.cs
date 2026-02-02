@@ -7,11 +7,11 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class HoneycrystalShard : ModProjectile
     {
-        private const int BurstDelay = 30;
+        private const int BurstDelay = 120;
         private const int BeeCount = 3;
 		// Trimmed sprite dimensions (pixels)
-		private const int SpriteWidth = 43;
-		private const int SpriteHeight = 52;
+		private const int SpriteWidth = 39;
+		private const int SpriteHeight = 48;
 
         public override void SetDefaults()
         {
@@ -35,7 +35,6 @@ namespace VenninBeeMod.Content.Projectiles
             }
 
             Projectile.velocity = Vector2.Zero;
-            Projectile.rotation += 0.1f;
 
             Projectile.localAI[1]++;
             if (Projectile.localAI[1] >= BurstDelay)
