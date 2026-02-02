@@ -3,6 +3,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.GameContent;
 
 namespace VenninBeeMod.Content.Projectiles
 {
@@ -11,15 +12,36 @@ namespace VenninBeeMod.Content.Projectiles
         private const int BurstDelay = 120;
         private const int BeeCount = 3;
 		// Trimmed sprite dimensions (pixels)
-		private const int SpriteWidth = 35;
-		private const int SpriteHeight = 44;
+		private const int SpriteWidth = 10;
+		private const int SpriteHeight = 20;
         private const int ExplodeFlag = 2;
+
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            // draw projectile normally
+            return true;
+        }
+
+        public override void PostDraw(Color lightColor)
+        {
+            // Draw the actual hitbox rectangle the engine uses
+            Rectangle hb = Projectile.Hitbox;
+            hb.Location -= (Main.screenPosition).ToPoint();
+
+            Main.spriteBatch.Draw(
+                TextureAssets.MagicPixel.Value,
+                hb,
+                Color.Red * 0.5f
+            );
+        }
 
         public override void SetDefaults()
         {
 			// Hitbox should match the sprite pixel dimensions.
-			Projectile.width = SpriteWidth;
-			Projectile.height = SpriteHeight;
+			Projectile.width = 1;
+			Projectile.height = 2;
+            Projectile.Resize(1, 2);
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Melee;
             Projectile.penetrate = -1;
@@ -43,6 +65,13 @@ namespace VenninBeeMod.Content.Projectiles
             {
                 Explode();
             }
+        }
+
+        public override bool TileCollideStyle(ref int width, ref int height, ref bool fallThrough, ref Vector2 hitboxCenterFrac)
+        {
+            width = 1;
+            height = 2;
+            return true;
         }
 
         public override bool OnTileCollide(Vector2 oldVelocity)
