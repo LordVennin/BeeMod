@@ -18,6 +18,7 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.width = 10;
             Projectile.height = 10;
             Projectile.DamageType = DamageClass.Ranged;
+            Projectile.aiStyle = 0;
             Projectile.penetrate = -1;
             Projectile.timeLeft = 120;
         }
@@ -41,6 +42,7 @@ namespace VenninBeeMod.Content.Projectiles
             }
 
             Projectile.velocity *= BounceSpeedMultiplier;
+            Projectile.netUpdate = true;
             return false;
         }
     }

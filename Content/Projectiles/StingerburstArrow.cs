@@ -29,7 +29,7 @@ namespace VenninBeeMod.Content.Projectiles
             hitboxHeight = Math.Max(1, (int)(Projectile.height * HitboxScale));
             Projectile.width = hitboxWidth;
             Projectile.height = hitboxHeight;
-            Projectile.scale = 0.22f;
+            Projectile.scale = 0.26f;
             Projectile.DamageType = DamageClass.Ranged;
             Projectile.penetrate = 1;
         }
