@@ -29,7 +29,7 @@ namespace VenninBeeMod.Content.Projectiles
             hitboxHeight = Math.Max(1, (int)(Projectile.height * HitboxScale));
             Projectile.width = hitboxWidth;
             Projectile.height = hitboxHeight;
-            Projectile.scale = 0.2f;
+            Projectile.scale = 0.22f;
             Projectile.DamageType = DamageClass.Ranged;
             Projectile.penetrate = 1;
         }
@@ -69,7 +69,8 @@ namespace VenninBeeMod.Content.Projectiles
                 if (Main.rand.NextBool(3))
                 {
                     int dustSize = Math.Max(3, (int)(Math.Min(SpriteWidth, SpriteHeight) * 0.08f));
-                    Vector2 dustPosition = Projectile.Center - new Vector2(dustSize * 0.5f);
+                    Vector2 dustOffset = Main.rand.NextVector2Circular(dustSize * 0.6f, dustSize * 0.6f);
+                    Vector2 dustPosition = Projectile.Center + dustOffset - new Vector2(dustSize * 0.5f);
                     int dust = Dust.NewDust(dustPosition, dustSize, dustSize, DustID.GreenTorch, 0f, 0f, 150, default, 1.7f);
                     Main.dust[dust].velocity *= 0.2f;
                     Main.dust[dust].noGravity = true;
