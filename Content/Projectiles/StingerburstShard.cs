@@ -7,7 +7,7 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class StingerburstShard : ModProjectile
     {
-        private const int MaxBounces = 3;
+        private const int MaxBounces = 2;
         private const float BounceSpeedMultiplier = 1.25f;
 
         public override string Texture => "Terraria/Images/Projectile_" + ProjectileID.Stinger;
@@ -21,6 +21,11 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.aiStyle = 0;
             Projectile.penetrate = -1;
             Projectile.timeLeft = 120;
+        }
+
+        public override void AI()
+        {
+            Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
         }
 
         public override bool OnTileCollide(Vector2 oldVelocity)
