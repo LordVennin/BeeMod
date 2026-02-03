@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -17,6 +18,16 @@ namespace VenninBeeMod.Content.Projectiles
 
         private const float AttackRange = 700f;
         private const float HealRange = 700f;
+        private const float HoverCircleRadiusMin = 40f;
+        private const float HoverCircleRadiusMax = 80f;
+        private const float HoverCircleHeight = 60f;
+        private const int HoverRetargetMinFrames = 45;
+        private const int HoverRetargetMaxFrames = 90;
+
+        private float hoverAngle;
+        private float hoverRadius;
+        private float hoverTimer;
+        private bool hoverInitialized;
 
         public override string Texture => "Terraria/Images/Projectile_" + ProjectileID.Bee;
 
@@ -59,6 +70,7 @@ namespace VenninBeeMod.Content.Projectiles
             float inertia = 20f;
 
             GetMinionOrder(player, out int minionIndex, out int minionCount);
+            UpdateHoverTarget(minionIndex);
             Vector2 idlePosition = player.Center + GetHoverOffset(minionIndex, minionCount);
 
             Projectile.friendly = (int)Projectile.ai[0] != StateHeal;
@@ -164,15 +176,34 @@ namespace VenninBeeMod.Content.Projectiles
 
         private Vector2 GetHoverOffset(int minionIndex, int minionCount)
         {
-            float time = Main.GameUpdateCount;
-            float centerOffset = (minionCount - 1) / 2f;
-            float spacing = 28f;
-            float baseX = (minionIndex - centerOffset) * spacing;
-            float bobX = (float)System.Math.Sin(time * 0.04f + minionIndex) * 10f;
-            float bobY = (float)System.Math.Cos(time * 0.05f + minionIndex * 1.7f) * 6f;
-            float y = -50f + bobY;
+            Vector2 circleOffset = new Vector2((float)System.Math.Cos(hoverAngle), (float)System.Math.Sin(hoverAngle)) * hoverRadius;
+            circleOffset.Y = System.Math.Min(circleOffset.Y, 0f);
 
-            return new Vector2(baseX + bobX, y);
+            float time = Main.GameUpdateCount;
+            float bobX = (float)System.Math.Sin(time * 0.06f + minionIndex * 0.9f) * 6f;
+            float bobY = (float)System.Math.Cos(time * 0.05f + minionIndex * 1.2f) * 4f;
+
+            return new Vector2(circleOffset.X + bobX, -HoverCircleHeight + circleOffset.Y + bobY);
+        }
+
+        private void UpdateHoverTarget(int minionIndex)
+        {
+            if (!hoverInitialized)
+            {
+                float seed = (Projectile.whoAmI + minionIndex) * 0.93f;
+                hoverAngle = seed;
+                hoverRadius = HoverCircleRadiusMin + (Projectile.whoAmI % 7) * 6f;
+                hoverTimer = HoverRetargetMinFrames + (Projectile.whoAmI % 11);
+                hoverInitialized = true;
+            }
+
+            hoverTimer--;
+            if (hoverTimer <= 0f)
+            {
+                hoverAngle = Main.rand.NextFloat(MathHelper.TwoPi);
+                hoverRadius = Main.rand.NextFloat(HoverCircleRadiusMin, HoverCircleRadiusMax);
+                hoverTimer = Main.rand.Next(HoverRetargetMinFrames, HoverRetargetMaxFrames + 1);
+            }
         }
 
         private NPC FindTarget(Player player)
@@ -213,6 +244,7 @@ namespace VenninBeeMod.Content.Projectiles
             {
                 Projectile.ai[1] = System.Math.Max(1, damageDone / 2);
                 Projectile.ai[0] = StateHeal;
+                SoundEngine.PlaySound(SoundID.Item4, Projectile.Center);
             }
         }
 
