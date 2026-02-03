@@ -47,7 +47,7 @@ namespace VenninBeeMod.Content.Projectiles
         public override void AI()
         {
             Player player = Main.player[Projectile.owner];
-            if (!player.active || player.dead || !player.GetModPlayer<HiveheartPlayer>().hiveheartActive)
+            if (!player.active || player.dead || !(player.GetModPlayer<HiveheartPlayer>().hiveheartActive || player.HasBuff(ModContent.BuffType<HiveheartBuff>())))
             {
                 Projectile.Kill();
                 return;
@@ -58,7 +58,8 @@ namespace VenninBeeMod.Content.Projectiles
             float speed = 8f;
             float inertia = 20f;
 
-            Vector2 idlePosition = player.Center + GetHoverOffset();
+            GetMinionOrder(player, out int minionIndex, out int minionCount);
+            Vector2 idlePosition = player.Center + GetHoverOffset(minionIndex, minionCount);
 
             Projectile.friendly = (int)Projectile.ai[0] != StateHeal;
 
@@ -75,7 +76,7 @@ namespace VenninBeeMod.Content.Projectiles
                         }
                         else
                         {
-                            Vector2 hoverPos = player.Center + GetHoverOffset();
+                            Vector2 hoverPos = player.Center + GetHoverOffset(minionIndex, minionCount);
                             Vector2 toHover = hoverPos - Projectile.Center;
 
                             Projectile.velocity = (Projectile.velocity * (inertia - 1) + toHover.SafeNormalize(Vector2.Zero) * speed) / inertia;
@@ -161,19 +162,17 @@ namespace VenninBeeMod.Content.Projectiles
             }
         }
 
-        private Vector2 GetHoverOffset()
+        private Vector2 GetHoverOffset(int minionIndex, int minionCount)
         {
             float time = Main.GameUpdateCount;
-            float phaseX = (Projectile.whoAmI * 0.37f) % MathHelper.TwoPi;
-            float phaseY = (Projectile.whoAmI * 0.61f) % MathHelper.TwoPi;
+            float centerOffset = (minionCount - 1) / 2f;
+            float spacing = 28f;
+            float baseX = (minionIndex - centerOffset) * spacing;
+            float bobX = (float)System.Math.Sin(time * 0.04f + minionIndex) * 10f;
+            float bobY = (float)System.Math.Cos(time * 0.05f + minionIndex * 1.7f) * 6f;
+            float y = -50f + bobY;
 
-            float x = (float)System.Math.Sin(time * 0.035f + phaseX) * 36f
-                + (float)System.Math.Sin(time * 0.011f + phaseY) * 18f;
-            float y = -70f
-                + (float)System.Math.Cos(time * 0.045f + phaseY) * 14f
-                + (float)System.Math.Sin(time * 0.019f + phaseX) * 8f;
-
-            return new Vector2(x, y);
+            return new Vector2(baseX + bobX, y);
         }
 
         private NPC FindTarget(Player player)
@@ -233,7 +232,7 @@ namespace VenninBeeMod.Content.Projectiles
             int frameHeight = texture.Height / Main.projFrames[Projectile.type];
             Rectangle frame = new Rectangle(0, frameHeight * Projectile.frame, texture.Width, frameHeight);
             Vector2 origin = frame.Size() / 2f;
-            SpriteEffects effects = Projectile.spriteDirection == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+            SpriteEffects effects = Projectile.spriteDirection == 1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
 
             Main.EntitySpriteDraw(
                 texture,
@@ -263,6 +262,33 @@ namespace VenninBeeMod.Content.Projectiles
             }
 
             return null;
+        }
+
+        private void GetMinionOrder(Player player, out int minionIndex, out int minionCount)
+        {
+            minionIndex = 0;
+            minionCount = 0;
+
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile proj = Main.projectile[i];
+                if (!proj.active || proj.owner != player.whoAmI || proj.type != Projectile.type)
+                {
+                    continue;
+                }
+
+                if (proj.whoAmI == Projectile.whoAmI)
+                {
+                    minionIndex = minionCount;
+                }
+
+                minionCount++;
+            }
+
+            if (minionCount == 0)
+            {
+                minionCount = 1;
+            }
         }
 
         private Player FindInjuredPlayer(Player owner)
