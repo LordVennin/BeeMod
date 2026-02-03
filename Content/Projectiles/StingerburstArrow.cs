@@ -10,6 +10,8 @@ namespace VenninBeeMod.Content.Projectiles
     {
         private const int ShardCount = 3;
         private const int StickDuration = 150;
+        private const float StuckFlag = 1f;
+        private const float SplitFlag = 1f;
 
         public override void SetDefaults()
         {
@@ -23,15 +25,16 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void PostAI()
         {
-            if (Projectile.ai[0] != 1f)
+            if (Projectile.localAI[0] != StuckFlag)
             {
                 return;
             }
 
             Projectile.velocity = Vector2.Zero;
-            Projectile.ai[1]++;
+            Projectile.aiStyle = 0;
+            Projectile.localAI[1]++;
 
-            if (Projectile.ai[1] <= StickDuration)
+            if (Projectile.localAI[1] <= StickDuration)
             {
                 Lighting.AddLight(Projectile.Center, 0.05f, 0.35f, 0.05f);
                 if (Main.rand.NextBool(3))
@@ -55,39 +58,40 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override bool OnTileCollide(Vector2 oldVelocity)
         {
-            if (Projectile.ai[0] == 1f)
+            if (Projectile.localAI[0] == StuckFlag)
             {
                 return false;
             }
 
             Vector2 normal = -oldVelocity.SafeNormalize(Vector2.UnitY);
-            Projectile.ai[0] = 1f;
-            Projectile.ai[1] = 0f;
-            Projectile.localAI[1] = normal.ToRotation();
+            Projectile.localAI[0] = StuckFlag;
+            Projectile.localAI[1] = 0f;
+            Projectile.ai[0] = normal.ToRotation();
             Projectile.velocity = Vector2.Zero;
             Projectile.tileCollide = false;
+            Projectile.aiStyle = 0;
             Projectile.netUpdate = true;
             return false;
         }
 
         private Vector2 GetShardBaseDirection()
         {
-            if (Projectile.ai[0] != 1f)
+            if (Projectile.localAI[0] != StuckFlag)
             {
                 return Projectile.velocity.SafeNormalize(Vector2.UnitX);
             }
 
-            return Projectile.localAI[1].ToRotationVector2();
+            return Projectile.ai[0].ToRotationVector2();
         }
 
         private void SplitIntoShards(Vector2 baseDirection)
         {
-            if (Projectile.localAI[0] == 1f || Main.myPlayer != Projectile.owner)
+            if (Projectile.ai[1] == SplitFlag || Main.myPlayer != Projectile.owner)
             {
                 return;
             }
 
-            Projectile.localAI[0] = 1f;
+            Projectile.ai[1] = SplitFlag;
 
             for (int i = 0; i < ShardCount; i++)
             {
