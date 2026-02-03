@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -14,8 +15,6 @@ namespace VenninBeeMod.Content.Projectiles
         private const float HitboxScale = 0.08f;
         private const int SpriteWidth = 100;
         private const int SpriteHeight = 100;
-        private const int SpriteOffsetX = 0;
-        private const int SpriteOffsetY = 0;
         private const int ShardCount = 3;
         private const int StickDuration = 150;
         private const float StuckFlag = 1f;
@@ -40,7 +39,17 @@ namespace VenninBeeMod.Content.Projectiles
             Vector2 center = Projectile.Center;
             Projectile.Resize(hitboxWidth, hitboxHeight);
             Projectile.Center = center;
-            ApplySpriteHitboxAlignment();
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            Texture2D texture = TextureAssets.Projectile[Type].Value;
+            Vector2 origin = new Vector2(texture.Width / 2f, texture.Height / 2f);
+            Vector2 position = Projectile.Center - Main.screenPosition;
+            SpriteEffects effects = Projectile.spriteDirection == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+
+            Main.spriteBatch.Draw(texture, position, null, lightColor, Projectile.rotation, origin, Projectile.scale, effects, 0f);
+            return false;
         }
 
         public override void PostAI()
@@ -137,15 +146,5 @@ namespace VenninBeeMod.Content.Projectiles
             }
         }
 
-        private void ApplySpriteHitboxAlignment()
-        {
-            float spriteCenterX = SpriteOffsetX + (SpriteWidth - 1) / 2f;
-            float spriteCenterY = SpriteOffsetY + (SpriteHeight - 1) / 2f;
-            float textureCenterX = TextureAssets.Projectile[Type].Width() / 2f;
-            float textureCenterY = TextureAssets.Projectile[Type].Height() / 2f;
-
-            DrawOriginOffsetX = (int)Math.Round(spriteCenterX - textureCenterX);
-            DrawOriginOffsetY = (int)Math.Round(spriteCenterY - textureCenterY);
-        }
     }
 }
