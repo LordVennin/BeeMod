@@ -39,7 +39,14 @@ namespace VenninBeeMod.Content.Items
         public override bool Shoot(Player player, Terraria.DataStructures.EntitySource_ItemUse_WithAmmo source, Microsoft.Xna.Framework.Vector2 position, Microsoft.Xna.Framework.Vector2 velocity, int type, int damage, float knockback)
         {
             player.AddBuff(Item.buffType, 2);
-            return player.ownedProjectileCounts[type] < 1;
+
+            if (player.ownedProjectileCounts[type] >= player.maxMinions)
+            {
+                return false;
+            }
+
+            Projectile.NewProjectile(source, player.Center, Microsoft.Xna.Framework.Vector2.Zero, type, damage, knockback, player.whoAmI);
+            return false;
         }
 
         public override void AddRecipes()
