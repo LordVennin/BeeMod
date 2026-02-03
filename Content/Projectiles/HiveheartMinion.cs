@@ -158,7 +158,7 @@ namespace VenninBeeMod.Content.Projectiles
                             {
                                 healTarget.statLife = System.Math.Min(healTarget.statLife + healAmount, healTarget.statLifeMax2);
                                 healTarget.HealEffect(healAmount);
-                                SoundEngine.PlaySound(SoundID.Item4, Projectile.Center);
+                                //SoundEngine.PlaySound(SoundID.Item4, Projectile.Center);
                                 SoundEngine.PlaySound(SoundID.Item9, Projectile.Center);
                             }
 
