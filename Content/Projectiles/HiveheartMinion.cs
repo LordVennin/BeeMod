@@ -148,6 +148,8 @@ namespace VenninBeeMod.Content.Projectiles
                             {
                                 healTarget.statLife = System.Math.Min(healTarget.statLife + healAmount, healTarget.statLifeMax2);
                                 healTarget.HealEffect(healAmount);
+                                SoundEngine.PlaySound(SoundID.Item4, Projectile.Center);
+                                SoundEngine.PlaySound(SoundID.Item9, Projectile.Center);
                             }
 
                             Projectile.ai[1] = 0f;
@@ -244,7 +246,6 @@ namespace VenninBeeMod.Content.Projectiles
             {
                 Projectile.ai[1] = System.Math.Max(1, damageDone / 2);
                 Projectile.ai[0] = StateHeal;
-                SoundEngine.PlaySound(SoundID.Item4, Projectile.Center);
             }
         }
 
