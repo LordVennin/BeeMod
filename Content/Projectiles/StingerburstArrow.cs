@@ -11,9 +11,9 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class StingerburstArrow : ModProjectile
     {
-        private const float HitboxScale = 0.12f;
-        private const int SpriteWidth = 38;
-        private const int SpriteHeight = 161;
+        private const float HitboxScale = 0.08f;
+        private const int SpriteWidth = 100;
+        private const int SpriteHeight = 100;
         private const int SpriteOffsetX = 0;
         private const int SpriteOffsetY = 0;
         private const int ShardCount = 3;
@@ -30,7 +30,7 @@ namespace VenninBeeMod.Content.Projectiles
             hitboxHeight = Math.Max(1, (int)(Projectile.height * HitboxScale));
             Projectile.width = hitboxWidth;
             Projectile.height = hitboxHeight;
-            Projectile.scale = 0.24f;
+            Projectile.scale = 0.2f;
             Projectile.DamageType = DamageClass.Ranged;
             Projectile.penetrate = 1;
         }
