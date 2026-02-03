@@ -58,13 +58,6 @@ namespace VenninBeeMod.Content.Projectiles
             float speed = 8f;
             float inertia = 20f;
 
-            if (Projectile.localAI[2] == 0f && Projectile.localAI[3] == 0f)
-            {
-                Projectile.localAI[2] = Main.rand.NextFloat(MathHelper.TwoPi);
-                Projectile.localAI[3] = Main.rand.NextFloat(MathHelper.TwoPi);
-                Projectile.netUpdate = true;
-            }
-
             Vector2 idlePosition = player.Center + GetHoverOffset();
 
             Projectile.friendly = (int)Projectile.ai[0] != StateHeal;
@@ -171,8 +164,8 @@ namespace VenninBeeMod.Content.Projectiles
         private Vector2 GetHoverOffset()
         {
             float time = Main.GameUpdateCount;
-            float phaseX = Projectile.localAI[2];
-            float phaseY = Projectile.localAI[3];
+            float phaseX = (Projectile.whoAmI * 0.37f) % MathHelper.TwoPi;
+            float phaseY = (Projectile.whoAmI * 0.61f) % MathHelper.TwoPi;
 
             float x = (float)System.Math.Sin(time * 0.035f + phaseX) * 36f
                 + (float)System.Math.Sin(time * 0.011f + phaseY) * 18f;
