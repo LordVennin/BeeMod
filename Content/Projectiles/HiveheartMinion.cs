@@ -223,7 +223,7 @@ namespace VenninBeeMod.Content.Projectiles
             if (player.HasMinionAttackTargetNPC)
             {
                 NPC npc = Main.npc[player.MinionAttackTargetNPC];
-                if (npc.CanBeChasedBy(this))
+                if (IsValidTarget(npc))
                 {
                     return npc;
                 }
@@ -234,7 +234,7 @@ namespace VenninBeeMod.Content.Projectiles
             for (int i = 0; i < Main.maxNPCs; i++)
             {
                 NPC npc = Main.npc[i];
-                if (!npc.CanBeChasedBy(this))
+                if (!IsValidTarget(npc))
                 {
                     continue;
                 }
@@ -261,6 +261,11 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override bool? CanHitNPC(NPC target)
         {
+            if (!IsValidTarget(target))
+            {
+                return false;
+            }
+
             return (int)Projectile.ai[0] == StateHeal ? false : null;
         }
 
@@ -298,13 +303,23 @@ namespace VenninBeeMod.Content.Projectiles
             if (targetIndex >= 0 && targetIndex < Main.maxNPCs)
             {
                 NPC target = Main.npc[targetIndex];
-                if (target.active && !target.friendly && target.CanBeChasedBy(this))
+                if (IsValidTarget(target))
                 {
                     return target;
                 }
             }
 
             return null;
+        }
+
+        private bool IsValidTarget(NPC npc)
+        {
+            if (npc == null || !npc.CanBeChasedBy(this))
+            {
+                return false;
+            }
+
+            return npc.type != NPCID.TargetDummy;
         }
 
         private void GetMinionOrder(Player player, out int minionIndex, out int minionCount)
