@@ -6,6 +6,8 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class StingerburstShard : ModProjectile
     {
+        public override string Texture => "Terraria/Images/Projectile_" + ProjectileID.Stinger;
+
         public override void SetDefaults()
         {
             Projectile.CloneDefaults(ProjectileID.WoodenArrowFriendly);
