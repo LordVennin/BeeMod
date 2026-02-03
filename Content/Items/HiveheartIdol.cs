@@ -4,6 +4,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using VenninBeeMod.Content.Buffs;
 using VenninBeeMod.Content.Projectiles;
+using Microsoft.Xna.Framework;
 
 namespace VenninBeeMod.Content.Items
 {
@@ -18,14 +19,14 @@ namespace VenninBeeMod.Content.Items
 
         public override void SetDefaults()
         {
-            Item.damage = 24;
+            Item.damage = 20;
             Item.DamageType = DamageClass.Summon;
             Item.mana = 10;
-            Item.width = 32;
-            Item.height = 32;
+            Item.width = 64;
+            Item.height = 64;
             Item.useTime = 36;
-            Item.useAnimation = 36;
-            Item.useStyle = ItemUseStyleID.HoldUp;
+            Item.useAnimation = 28;
+            Item.useStyle = ItemUseStyleID.Swing;
             Item.noMelee = true;
             Item.knockBack = 2f;
             Item.value = Item.buyPrice(gold: 2);
@@ -33,7 +34,12 @@ namespace VenninBeeMod.Content.Items
             Item.UseSound = SoundID.Item44;
             Item.shoot = ModContent.ProjectileType<HiveheartMinion>();
             Item.buffType = ModContent.BuffType<HiveheartBuff>();
-            Item.shootSpeed = 0f;
+            Item.shootSpeed = 4f;
+        }
+
+        public override Vector2? HoldoutOffset()
+        {
+            return new Vector2(-90, 0); // X moves it left/right, Y moves it up/down
         }
 
         public override bool Shoot(Player player, Terraria.DataStructures.EntitySource_ItemUse_WithAmmo source, Microsoft.Xna.Framework.Vector2 position, Microsoft.Xna.Framework.Vector2 velocity, int type, int damage, float knockback)
@@ -55,7 +61,7 @@ namespace VenninBeeMod.Content.Items
                 .AddIngredient(ItemID.CrystalShard, 10)
                 .AddIngredient(ItemID.SoulofLight, 8)
                 .AddIngredient(ItemID.SoulofNight, 8)
-                .AddIngredient(ItemID.SpiderFang, 12)
+                .AddIngredient(ItemID.Ruby, 3)
                 .AddTile(TileID.MythrilAnvil)
                 .Register();
         }
