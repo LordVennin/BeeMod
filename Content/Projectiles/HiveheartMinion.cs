@@ -138,6 +138,16 @@ namespace VenninBeeMod.Content.Projectiles
                             break;
                         }
 
+                        if (Main.GameUpdateCount % 6 == 0)
+                        {
+                            Vector2 dustOffset = Main.rand.NextVector2Circular(10f, 10f);
+                            Dust dust = Dust.NewDustPerfect(Projectile.Center + dustOffset, DustID.Honey);
+                            dust.velocity = dustOffset.SafeNormalize(Vector2.UnitY) * Main.rand.NextFloat(0.3f, 0.8f);
+                            dust.noGravity = true;
+                            dust.scale = Main.rand.NextFloat(0.9f, 1.2f);
+                            dust.color = Color.Red;
+                        }
+
                         Vector2 toPlayer = healTarget.Center - Projectile.Center;
                         Projectile.velocity = (Projectile.velocity * (inertia - 1) + toPlayer.SafeNormalize(Vector2.Zero) * 9f) / inertia;
 
