@@ -1,5 +1,7 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using VenninBeeMod.Content.Buffs;
@@ -8,8 +10,13 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class HiveheartMinion : ModProjectile
     {
-        private const int AttackCooldown = 60;
-        private const float AttackRange = 600f;
+        private const int StateIdle = 0;
+        private const int StateAttack = 1;
+        private const int StateReturn = 2;
+        private const int StateHeal = 3;
+
+        private const float AttackRange = 700f;
+        private const float HealRange = 700f;
 
         public override string Texture => "Terraria/Images/Projectile_" + ProjectileID.Bee;
 
@@ -47,37 +54,102 @@ namespace VenninBeeMod.Content.Projectiles
 
             Projectile.timeLeft = 2;
 
-            if (Projectile.ai[0] > 0f)
-            {
-                Projectile.ai[0]--;
-            }
+            float speed = 8f;
+            float inertia = 20f;
 
-            NPC target = FindTarget(player);
             Vector2 idlePosition = player.Center + new Vector2(
-                (float)System.Math.Sin(Main.GameUpdateCount * 0.05f + Projectile.whoAmI) * 50f,
+                (float)System.Math.Sin(Main.GameUpdateCount * 0.05f + Projectile.whoAmI) * 30f,
                 -60f
             );
 
-            Vector2 destination = target != null ? target.Center : idlePosition;
-            float speed = target != null ? 10f : 7f;
-            float inertia = 20f;
-
-            Vector2 toDestination = destination - Projectile.Center;
-            if (toDestination.Length() > 10f)
+            switch ((int)Projectile.ai[0])
             {
-                Projectile.velocity = (Projectile.velocity * (inertia - 1) + toDestination.SafeNormalize(Vector2.Zero) * speed) / inertia;
-            }
+                case StateIdle:
+                    {
+                        NPC target = FindTarget(player);
+                        if (target != null)
+                        {
+                            Projectile.localAI[0] = target.whoAmI;
+                            Projectile.localAI[1] = 120f;
+                            Projectile.ai[0] = StateAttack;
+                        }
+                        else
+                        {
+                            Vector2 swarmOffset = new Vector2(
+                                (float)System.Math.Sin(Main.GameUpdateCount * 0.05f + Projectile.whoAmI) * 30f,
+                                (float)System.Math.Cos(Main.GameUpdateCount * 0.1f + Projectile.whoAmI) * 10f
+                            );
+                            Vector2 hoverPos = player.Center + new Vector2(0, -60f) + swarmOffset;
+                            Vector2 toHover = hoverPos - Projectile.Center;
 
-            if (target != null && Projectile.ai[0] <= 0f)
-            {
-                Vector2 shootVelocity = (target.Center - Projectile.Center).SafeNormalize(Vector2.UnitY) * 8f;
-                int damage = (int)(Projectile.damage * 0.6f);
-                Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, shootVelocity, ModContent.ProjectileType<HealingBee>(), damage, Projectile.knockBack, Projectile.owner);
-                Projectile.ai[0] = AttackCooldown;
+                            Projectile.velocity = (Projectile.velocity * (inertia - 1) + toHover.SafeNormalize(Vector2.Zero) * speed) / inertia;
+                        }
+                    }
+                    break;
+
+                case StateAttack:
+                    {
+                        Projectile.localAI[1]--;
+                        NPC target = GetStoredTarget();
+
+                        if (target == null)
+                        {
+                            Projectile.ai[0] = StateReturn;
+                            break;
+                        }
+
+                        Vector2 toTarget = target.Center - Projectile.Center;
+                        Projectile.velocity = (Projectile.velocity * (inertia - 1) + toTarget.SafeNormalize(Vector2.Zero) * 10f) / inertia;
+
+                        if (Projectile.localAI[1] <= 0f)
+                        {
+                            Projectile.ai[0] = StateReturn;
+                        }
+                    }
+                    break;
+
+                case StateReturn:
+                    {
+                        Vector2 toIdle = idlePosition - Projectile.Center;
+                        Projectile.velocity = (Projectile.velocity * (inertia - 1) + toIdle.SafeNormalize(Vector2.Zero) * speed) / inertia;
+
+                        if (toIdle.Length() < 20f)
+                        {
+                            Projectile.ai[0] = StateIdle;
+                        }
+                    }
+                    break;
+
+                case StateHeal:
+                    {
+                        Player injuredPlayer = FindInjuredPlayer(player);
+                        if (injuredPlayer == null)
+                        {
+                            Projectile.ai[0] = StateReturn;
+                            break;
+                        }
+
+                        Vector2 toPlayer = injuredPlayer.Center - Projectile.Center;
+                        Projectile.velocity = (Projectile.velocity * (inertia - 1) + toPlayer.SafeNormalize(Vector2.Zero) * 9f) / inertia;
+
+                        if (toPlayer.Length() < 20f)
+                        {
+                            int healAmount = System.Math.Max(1, (int)Projectile.ai[1]);
+                            if (injuredPlayer.statLife < injuredPlayer.statLifeMax2)
+                            {
+                                injuredPlayer.statLife = System.Math.Min(injuredPlayer.statLife + healAmount, injuredPlayer.statLifeMax2);
+                                injuredPlayer.HealEffect(healAmount);
+                            }
+
+                            Projectile.ai[1] = 0f;
+                            Projectile.ai[0] = StateIdle;
+                        }
+                    }
+                    break;
             }
 
             Projectile.frameCounter++;
-            if (Projectile.frameCounter >= 5)
+            if (Projectile.frameCounter >= 6)
             {
                 Projectile.frameCounter = 0;
                 Projectile.frame = (Projectile.frame + 1) % Main.projFrames[Projectile.type];
@@ -119,6 +191,97 @@ namespace VenninBeeMod.Content.Projectiles
                 {
                     closestDistance = distance;
                     closest = npc;
+                }
+            }
+
+            return closest;
+        }
+
+        public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            if (Projectile.ai[0] != StateHeal)
+            {
+                Projectile.ai[1] = System.Math.Max(1, damageDone / 2);
+                Projectile.ai[0] = StateHeal;
+            }
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            if ((int)Projectile.ai[0] != StateHeal)
+            {
+                return true;
+            }
+
+            Texture2D texture = ModContent.Request<Texture2D>("VenninBeeMod/Content/Projectiles/HiveHornetMinionHeart").Value;
+            int frameHeight = texture.Height / Main.projFrames[Projectile.type];
+            Rectangle frame = new Rectangle(0, frameHeight * Projectile.frame, texture.Width, frameHeight);
+            Vector2 origin = frame.Size() / 2f;
+            SpriteEffects effects = Projectile.spriteDirection == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+
+            Main.EntitySpriteDraw(
+                texture,
+                Projectile.Center - Main.screenPosition,
+                frame,
+                Projectile.GetAlpha(lightColor),
+                Projectile.rotation,
+                origin,
+                Projectile.scale,
+                effects,
+                0f
+            );
+
+            return false;
+        }
+
+        private NPC GetStoredTarget()
+        {
+            int targetIndex = (int)Projectile.localAI[0];
+            if (targetIndex >= 0 && targetIndex < Main.maxNPCs)
+            {
+                NPC target = Main.npc[targetIndex];
+                if (target.active && !target.friendly && target.CanBeChasedBy(this))
+                {
+                    return target;
+                }
+            }
+
+            return null;
+        }
+
+        private Player FindInjuredPlayer(Player owner)
+        {
+            Player closest = null;
+            float closestDistance = HealRange;
+
+            for (int i = 0; i < Main.maxPlayers; i++)
+            {
+                Player player = Main.player[i];
+                if (!player.active || player.dead)
+                {
+                    continue;
+                }
+
+                if (owner.team == 0 && player.whoAmI != owner.whoAmI)
+                {
+                    continue;
+                }
+
+                if (owner.team != 0 && player.team != owner.team)
+                {
+                    continue;
+                }
+
+                if (player.statLife >= player.statLifeMax2)
+                {
+                    continue;
+                }
+
+                float distance = Vector2.Distance(Projectile.Center, player.Center);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closest = player;
                 }
             }
 
