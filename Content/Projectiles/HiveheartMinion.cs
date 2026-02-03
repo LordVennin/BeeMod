@@ -58,16 +58,14 @@ namespace VenninBeeMod.Content.Projectiles
             float speed = 8f;
             float inertia = 20f;
 
-            Vector2 idlePosition = player.Center + new Vector2(
-                (float)System.Math.Sin(Main.GameUpdateCount * 0.05f + Projectile.whoAmI) * 30f,
-                -60f
-            );
-            if (Projectile.localAI[2] == 0f)
+            if (Projectile.localAI[2] == 0f && Projectile.localAI[3] == 0f)
             {
-                Projectile.Center = idlePosition;
+                Projectile.localAI[2] = Main.rand.NextFloat(MathHelper.TwoPi);
+                Projectile.localAI[3] = Main.rand.NextFloat(MathHelper.TwoPi);
                 Projectile.netUpdate = true;
-                Projectile.localAI[2] = 1f;
             }
+
+            Vector2 idlePosition = player.Center + GetHoverOffset();
 
             Projectile.friendly = (int)Projectile.ai[0] != StateHeal;
 
@@ -84,11 +82,7 @@ namespace VenninBeeMod.Content.Projectiles
                         }
                         else
                         {
-                            Vector2 swarmOffset = new Vector2(
-                                (float)System.Math.Sin(Main.GameUpdateCount * 0.05f + Projectile.whoAmI) * 30f,
-                                (float)System.Math.Cos(Main.GameUpdateCount * 0.1f + Projectile.whoAmI) * 10f
-                            );
-                            Vector2 hoverPos = player.Center + new Vector2(0, -60f) + swarmOffset;
+                            Vector2 hoverPos = player.Center + GetHoverOffset();
                             Vector2 toHover = hoverPos - Projectile.Center;
 
                             Projectile.velocity = (Projectile.velocity * (inertia - 1) + toHover.SafeNormalize(Vector2.Zero) * speed) / inertia;
@@ -166,12 +160,27 @@ namespace VenninBeeMod.Content.Projectiles
 
             if (Projectile.velocity.X > 0.2f)
             {
-                Projectile.spriteDirection = -1;
+                Projectile.spriteDirection = 1;
             }
             else if (Projectile.velocity.X < -0.2f)
             {
-                Projectile.spriteDirection = 1;
+                Projectile.spriteDirection = -1;
             }
+        }
+
+        private Vector2 GetHoverOffset()
+        {
+            float time = Main.GameUpdateCount;
+            float phaseX = Projectile.localAI[2];
+            float phaseY = Projectile.localAI[3];
+
+            float x = (float)System.Math.Sin(time * 0.035f + phaseX) * 36f
+                + (float)System.Math.Sin(time * 0.011f + phaseY) * 18f;
+            float y = -70f
+                + (float)System.Math.Cos(time * 0.045f + phaseY) * 14f
+                + (float)System.Math.Sin(time * 0.019f + phaseX) * 8f;
+
+            return new Vector2(x, y);
         }
 
         private NPC FindTarget(Player player)
