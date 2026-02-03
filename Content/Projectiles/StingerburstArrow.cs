@@ -1,27 +1,46 @@
 using System;
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.Audio;
+using Terraria.GameContent;
 using Terraria.ModLoader;
 
 namespace VenninBeeMod.Content.Projectiles
 {
     public class StingerburstArrow : ModProjectile
     {
+        private const float HitboxScale = 0.12f;
+        private const int SpriteWidth = 38;
+        private const int SpriteHeight = 161;
+        private const int SpriteOffsetX = 0;
+        private const int SpriteOffsetY = 0;
         private const int ShardCount = 3;
         private const int StickDuration = 150;
         private const float StuckFlag = 1f;
         private const float SplitFlag = 1f;
+        private int hitboxWidth;
+        private int hitboxHeight;
 
         public override void SetDefaults()
         {
             Projectile.CloneDefaults(ProjectileID.WoodenArrowFriendly);
-            Projectile.width = Math.Max(1, (int)(Projectile.width * 0.18f));
-            Projectile.height = Math.Max(1, (int)(Projectile.height * 0.18f));
+            hitboxWidth = Math.Max(1, (int)(Projectile.width * HitboxScale));
+            hitboxHeight = Math.Max(1, (int)(Projectile.height * HitboxScale));
+            Projectile.width = hitboxWidth;
+            Projectile.height = hitboxHeight;
             Projectile.scale = 0.24f;
             Projectile.DamageType = DamageClass.Ranged;
             Projectile.penetrate = 1;
+        }
+
+        public override void OnSpawn(IEntitySource source)
+        {
+            Vector2 center = Projectile.Center;
+            Projectile.Resize(hitboxWidth, hitboxHeight);
+            Projectile.Center = center;
+            ApplySpriteHitboxAlignment();
         }
 
         public override void PostAI()
@@ -40,9 +59,9 @@ namespace VenninBeeMod.Content.Projectiles
                 Lighting.AddLight(Projectile.Center, 0.07f, 0.4f, 0.07f);
                 if (Main.rand.NextBool(3))
                 {
-                    int dustSize = Math.Max(1, (int)(Math.Min(Projectile.width, Projectile.height) * 0.6f));
+                    int dustSize = Math.Max(3, (int)(Math.Min(SpriteWidth, SpriteHeight) * 0.08f));
                     Vector2 dustPosition = Projectile.Center - new Vector2(dustSize * 0.5f);
-                    int dust = Dust.NewDust(dustPosition, dustSize, dustSize, DustID.GreenTorch, 0f, 0f, 150, default, 1.1f);
+                    int dust = Dust.NewDust(dustPosition, dustSize, dustSize, DustID.GreenTorch, 0f, 0f, 150, default, 1.7f);
                     Main.dust[dust].velocity *= 0.2f;
                     Main.dust[dust].noGravity = true;
                 }
@@ -96,6 +115,7 @@ namespace VenninBeeMod.Content.Projectiles
 
             Projectile.ai[1] = SplitFlag;
             SoundEngine.PlaySound(SoundID.Item14, Projectile.Center);
+            SpawnSplitDust();
 
             for (int i = 0; i < ShardCount; i++)
             {
@@ -103,6 +123,29 @@ namespace VenninBeeMod.Content.Projectiles
                 int damage = (int)(Projectile.damage * 0.5f);
                 Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, velocity, ModContent.ProjectileType<StingerburstShard>(), damage, Projectile.knockBack * 0.6f, Projectile.owner);
             }
+        }
+
+        private void SpawnSplitDust()
+        {
+            for (int i = 0; i < 16; i++)
+            {
+                Vector2 dustOffset = Main.rand.NextVector2Circular(10f, 10f);
+                Dust dust = Dust.NewDustPerfect(Projectile.Center + dustOffset, DustID.GreenTorch);
+                dust.velocity = dustOffset.SafeNormalize(Vector2.UnitY) * Main.rand.NextFloat(1.5f, 3.2f);
+                dust.noGravity = true;
+                dust.scale = Main.rand.NextFloat(1.4f, 2.1f);
+            }
+        }
+
+        private void ApplySpriteHitboxAlignment()
+        {
+            float spriteCenterX = SpriteOffsetX + (SpriteWidth - 1) / 2f;
+            float spriteCenterY = SpriteOffsetY + (SpriteHeight - 1) / 2f;
+            float textureCenterX = TextureAssets.Projectile[Type].Width() / 2f;
+            float textureCenterY = TextureAssets.Projectile[Type].Height() / 2f;
+
+            DrawOriginOffsetX = (int)Math.Round(spriteCenterX - textureCenterX);
+            DrawOriginOffsetY = (int)Math.Round(spriteCenterY - textureCenterY);
         }
     }
 }
