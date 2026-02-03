@@ -29,8 +29,9 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void SetDefaults()
         {
-            Projectile.width = 20;
-            Projectile.height = 20;
+            Projectile.width = 30;
+            Projectile.height = 30;
+            Projectile.scale = 1.5f;
             Projectile.friendly = true;
             Projectile.minion = true;
             Projectile.DamageType = DamageClass.Summon;
@@ -122,23 +123,23 @@ namespace VenninBeeMod.Content.Projectiles
 
                 case StateHeal:
                     {
-                        Player injuredPlayer = FindInjuredPlayer(player);
-                        if (injuredPlayer == null)
+                        Player healTarget = FindHealTarget(player);
+                        if (healTarget == null)
                         {
                             Projectile.ai[0] = StateReturn;
                             break;
                         }
 
-                        Vector2 toPlayer = injuredPlayer.Center - Projectile.Center;
+                        Vector2 toPlayer = healTarget.Center - Projectile.Center;
                         Projectile.velocity = (Projectile.velocity * (inertia - 1) + toPlayer.SafeNormalize(Vector2.Zero) * 9f) / inertia;
 
                         if (toPlayer.Length() < 20f)
                         {
                             int healAmount = System.Math.Max(1, (int)Projectile.ai[1]);
-                            if (injuredPlayer.statLife < injuredPlayer.statLifeMax2)
+                            if (healTarget.statLife < healTarget.statLifeMax2)
                             {
-                                injuredPlayer.statLife = System.Math.Min(injuredPlayer.statLife + healAmount, injuredPlayer.statLifeMax2);
-                                injuredPlayer.HealEffect(healAmount);
+                                healTarget.statLife = System.Math.Min(healTarget.statLife + healAmount, healTarget.statLifeMax2);
+                                healTarget.HealEffect(healAmount);
                             }
 
                             Projectile.ai[1] = 0f;
@@ -286,6 +287,46 @@ namespace VenninBeeMod.Content.Projectiles
             }
 
             return closest;
+        }
+
+        private Player FindHealTarget(Player owner)
+        {
+            Player injuredPlayer = FindInjuredPlayer(owner);
+            if (injuredPlayer != null)
+            {
+                return injuredPlayer;
+            }
+
+            Player closest = null;
+            float closestDistance = HealRange;
+
+            for (int i = 0; i < Main.maxPlayers; i++)
+            {
+                Player player = Main.player[i];
+                if (!player.active || player.dead)
+                {
+                    continue;
+                }
+
+                if (owner.team == 0 && player.whoAmI != owner.whoAmI)
+                {
+                    continue;
+                }
+
+                if (owner.team != 0 && player.team != owner.team)
+                {
+                    continue;
+                }
+
+                float distance = Vector2.Distance(Projectile.Center, player.Center);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closest = player;
+                }
+            }
+
+            return closest ?? owner;
         }
     }
 }
