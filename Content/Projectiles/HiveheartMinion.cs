@@ -62,6 +62,14 @@ namespace VenninBeeMod.Content.Projectiles
                 (float)System.Math.Sin(Main.GameUpdateCount * 0.05f + Projectile.whoAmI) * 30f,
                 -60f
             );
+            if (Projectile.localAI[2] == 0f)
+            {
+                Projectile.Center = idlePosition;
+                Projectile.netUpdate = true;
+                Projectile.localAI[2] = 1f;
+            }
+
+            Projectile.friendly = (int)Projectile.ai[0] != StateHeal;
 
             switch ((int)Projectile.ai[0])
             {
@@ -205,6 +213,11 @@ namespace VenninBeeMod.Content.Projectiles
                 Projectile.ai[1] = System.Math.Max(1, damageDone / 2);
                 Projectile.ai[0] = StateHeal;
             }
+        }
+
+        public override bool? CanHitNPC(NPC target)
+        {
+            return (int)Projectile.ai[0] == StateHeal ? false : null;
         }
 
         public override bool PreDraw(ref Color lightColor)
