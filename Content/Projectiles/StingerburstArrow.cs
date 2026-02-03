@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -12,6 +13,9 @@ namespace VenninBeeMod.Content.Projectiles
         public override void SetDefaults()
         {
             Projectile.CloneDefaults(ProjectileID.WoodenArrowFriendly);
+            Projectile.width = Math.Max(1, (int)(Projectile.width * 0.2f));
+            Projectile.height = Math.Max(1, (int)(Projectile.height * 0.2f));
+            Projectile.scale = 0.2f;
             Projectile.DamageType = DamageClass.Ranged;
             Projectile.penetrate = 1;
         }
