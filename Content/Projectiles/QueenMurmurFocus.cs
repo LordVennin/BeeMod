@@ -10,6 +10,7 @@ namespace VenninBeeMod.Content.Projectiles
     {
         private const int MaxBees = 50;
         private const int BeeSpawnInterval = 6;
+        private const int StreamInterval = 5;
         private const int ReleaseIgnoreFrames = 10;
         public override string Texture => "VenninBeeMod/Content/Projectiles/BeeFollowerMinion";
 
@@ -58,6 +59,7 @@ namespace VenninBeeMod.Content.Projectiles
             player.itemAnimation = 2;
 
             int beeCount = CountChargingBees();
+            HandleStreamFire(player, beeCount);
 
             if (beeCount < MaxBees)
             {
@@ -75,6 +77,25 @@ namespace VenninBeeMod.Content.Projectiles
                     SpawnBee(player);
                 }
             }
+        }
+
+        private void HandleStreamFire(Player player, int beeCount)
+        {
+            if (player.altFunctionUse != 2 || beeCount == 0)
+            {
+                Projectile.localAI[1] = 0f;
+                return;
+            }
+
+            Projectile.localAI[1]++;
+            if (Projectile.localAI[1] < StreamInterval)
+            {
+                return;
+            }
+
+            Projectile.localAI[1] = 0f;
+            Vector2 targetDirection = (Main.MouseWorld - player.Center).SafeNormalize(Vector2.UnitX * player.direction);
+            ReleaseSingleBee(player, targetDirection, 12f);
         }
 
         private void SpawnBee(Player player)
@@ -158,6 +179,34 @@ namespace VenninBeeMod.Content.Projectiles
                 projectile.velocity = targetDirection.RotatedBy(Main.rand.NextFloat(-0.2f, 0.2f)) * speed;
                 projectile.netUpdate = true;
             }
+        }
+
+        private bool ReleaseSingleBee(Player player, Vector2 direction, float speed)
+        {
+            if (Main.myPlayer != Projectile.owner)
+            {
+                return false;
+            }
+
+            int beeType = ModContent.ProjectileType<QueenMurmurBee>();
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile projectile = Main.projectile[i];
+                if (!projectile.active || projectile.owner != Projectile.owner || projectile.type != beeType || projectile.ai[0] != 0f)
+                {
+                    continue;
+                }
+
+                projectile.ai[0] = 1f;
+                projectile.ai[1] = -ReleaseIgnoreFrames;
+                projectile.timeLeft = 120;
+                projectile.tileCollide = false;
+                projectile.velocity = direction * speed;
+                projectile.netUpdate = true;
+                return true;
+            }
+
+            return false;
         }
     }
 }
