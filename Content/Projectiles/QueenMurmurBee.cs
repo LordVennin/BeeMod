@@ -96,11 +96,11 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.rotation = 0f;
             if (Projectile.velocity.X > 0.15f)
             {
-                Projectile.spriteDirection = 1;
+                Projectile.spriteDirection = -1;
             }
             else if (Projectile.velocity.X < -0.15f)
             {
-                Projectile.spriteDirection = -1;
+                Projectile.spriteDirection = 1;
             }
         }
     }

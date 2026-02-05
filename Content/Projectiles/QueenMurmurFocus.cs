@@ -9,8 +9,7 @@ namespace VenninBeeMod.Content.Projectiles
     {
         private const int MaxBees = 20;
         private const int BeeSpawnInterval = 6;
-        private const int ManaPerSecond = 6;
-        private const int ManaInterval = 60;
+        private const int ManaPerBee = 2;
         private const int ReleaseIgnoreFrames = 10;
         public override string Texture => "VenninBeeMod/Content/Projectiles/BeeFollowerMinion";
 
@@ -62,22 +61,16 @@ namespace VenninBeeMod.Content.Projectiles
 
             if (beeCount < MaxBees)
             {
-                Projectile.localAI[1]++;
-                if (Projectile.localAI[1] >= ManaInterval)
+                Projectile.localAI[0]++;
+                if (Projectile.localAI[0] >= BeeSpawnInterval)
                 {
-                    Projectile.localAI[1] = 0f;
-                    if (!player.CheckMana(ManaPerSecond, true))
+                    Projectile.localAI[0] = 0f;
+                    if (!player.CheckMana(ManaPerBee, true))
                     {
                         ReleaseBees(player);
                         Projectile.Kill();
                         return;
                     }
-                }
-
-                Projectile.localAI[0]++;
-                if (Projectile.localAI[0] >= BeeSpawnInterval)
-                {
-                    Projectile.localAI[0] = 0f;
                     SpawnBee(player);
                 }
             }
