@@ -140,10 +140,11 @@ namespace VenninBeeMod.Content.Projectiles
             }
 
             // Sprite direction
-            if (Projectile.velocity.X > 0.2f)
-                Projectile.spriteDirection = -1;
-            else if (Projectile.velocity.X < -0.2f)
-                Projectile.spriteDirection = 1;
+            if (Projectile.velocity.LengthSquared() > 0.01f)
+            {
+                Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
+                Projectile.spriteDirection = Projectile.velocity.X >= 0f ? 1 : -1;
+            }
         }
 
         private NPC FindTarget()

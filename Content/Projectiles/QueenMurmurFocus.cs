@@ -7,6 +7,7 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class QueenMurmurFocus : ModProjectile
     {
+        public override string Texture => "VenninBeeMod/Content/Projectiles/BeeFollowerMinion";
         private const int MaxBees = 20;
         private const int BeeSpawnInterval = 6;
         private const int ManaPerBee = 2;
