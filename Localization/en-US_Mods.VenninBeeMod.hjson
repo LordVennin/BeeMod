@@ -9,6 +9,15 @@ Items: {
 		Tooltip: Fires sticky honey globs that heal.
 	}
 
+	SoulDripScepter: {
+		DisplayName: Queen's Murmur
+		Tooltip:
+			'''
+			Hold to gather a pheromone swarm of bees
+			Release to send them toward your cursor
+			'''
+	}
+
 	BeeSwarmComb: {
 		DisplayName: Bee Swarm Comb
 		Tooltip: Spawns a small bee minion.
