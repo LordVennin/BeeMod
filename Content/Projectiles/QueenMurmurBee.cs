@@ -7,17 +7,17 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class QueenMurmurBee : ModProjectile
     {
-        public override string Texture => "Terraria/Images/Projectile_" + ProjectileID.Hornet;
+        public override string Texture => "VenninBeeMod/Content/Projectiles/BeeFollowerMinion";
 
         public override void SetStaticDefaults()
         {
-            Main.projFrames[Projectile.type] = Main.projFrames[ProjectileID.Hornet];
+            Main.projFrames[Projectile.type] = 4;
         }
 
         public override void SetDefaults()
         {
-            Projectile.width = 22;
-            Projectile.height = 22;
+            Projectile.width = 16;
+            Projectile.height = 16;
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Magic;
             Projectile.penetrate = 1;
