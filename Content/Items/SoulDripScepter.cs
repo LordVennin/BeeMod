@@ -8,6 +8,7 @@ namespace VenninBeeMod.Content.Items
 {
     public class SoulDripScepter : ModItem
     {
+        public const int ManaPerBee = 4;
         public override void SetStaticDefaults()
         {
             CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
@@ -17,7 +18,7 @@ namespace VenninBeeMod.Content.Items
         {
             Item.damage = 36;
             Item.DamageType = DamageClass.Magic;
-            Item.mana = 0;
+            Item.mana = ManaPerBee;
             Item.width = 36;
             Item.height = 36;
             Item.useTime = 10;
