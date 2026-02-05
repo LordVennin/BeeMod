@@ -12,6 +12,7 @@ namespace VenninBeeMod.Content.Projectiles
         private const int ManaPerSecond = 6;
         private const int ManaInterval = 60;
         private const int ReleaseIgnoreFrames = 10;
+        public override string Texture => "VenninBeeMod/Content/Projectiles/BeeFollowerMinion";
 
         public override void SetDefaults()
         {
