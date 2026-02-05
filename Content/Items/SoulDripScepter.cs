@@ -45,5 +45,6 @@ namespace VenninBeeMod.Content.Items
                 .AddTile(TileID.MythrilAnvil)
                 .Register();
         }
+
     }
 }
