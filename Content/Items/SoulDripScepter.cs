@@ -12,6 +12,7 @@ namespace VenninBeeMod.Content.Items
         public override void SetStaticDefaults()
         {
             CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
+            ItemID.Sets.ItemsThatAllowRepeatedRightClick[Type] = true;
         }
 
         public override void SetDefaults()
@@ -44,6 +45,11 @@ namespace VenninBeeMod.Content.Items
                 .AddIngredient(ItemID.BottledHoney, 6)
                 .AddTile(TileID.MythrilAnvil)
                 .Register();
+        }
+
+        public override bool AltFunctionUse(Player player)
+        {
+            return true;
         }
     }
 }
