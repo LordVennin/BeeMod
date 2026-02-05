@@ -7,9 +7,9 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class QueenMurmurFocus : ModProjectile
     {
-        private const int MaxBees = 20;
+        private const int MaxBees = 50;
         private const int BeeSpawnInterval = 6;
-        private const int ManaPerBee = 2;
+        private const int ManaPerBee = 4;
         private const int ReleaseIgnoreFrames = 10;
         public override string Texture => "VenninBeeMod/Content/Projectiles/BeeFollowerMinion";
 
@@ -57,7 +57,7 @@ namespace VenninBeeMod.Content.Projectiles
             player.itemTime = 2;
             player.itemAnimation = 2;
 
-            int beeCount = CountOwnedBees();
+            int beeCount = CountChargingBees();
 
             if (beeCount < MaxBees)
             {
@@ -102,13 +102,16 @@ namespace VenninBeeMod.Content.Projectiles
             }
         }
 
-        private int CountOwnedBees()
+        private int CountChargingBees()
         {
             int count = 0;
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
                 Projectile projectile = Main.projectile[i];
-                if (projectile.active && projectile.owner == Projectile.owner && projectile.type == ModContent.ProjectileType<QueenMurmurBee>())
+                if (projectile.active
+                    && projectile.owner == Projectile.owner
+                    && projectile.type == ModContent.ProjectileType<QueenMurmurBee>()
+                    && projectile.ai[0] == 0f)
                 {
                     count++;
                 }
