@@ -1,7 +1,8 @@
+using System;
 using Microsoft.Xna.Framework;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
+using VenninBeeMod.Content.Items;
 
 namespace VenninBeeMod.Content.Projectiles
 {
@@ -9,7 +10,6 @@ namespace VenninBeeMod.Content.Projectiles
     {
         private const int MaxBees = 50;
         private const int BeeSpawnInterval = 6;
-        private const int ManaPerBee = 4;
         private const int ReleaseIgnoreFrames = 10;
         public override string Texture => "VenninBeeMod/Content/Projectiles/BeeFollowerMinion";
 
@@ -65,7 +65,8 @@ namespace VenninBeeMod.Content.Projectiles
                 if (Projectile.localAI[0] >= BeeSpawnInterval)
                 {
                     Projectile.localAI[0] = 0f;
-                    if (!player.CheckMana(ManaPerBee, true))
+                    int manaCost = GetManaCost(player);
+                    if (!player.CheckMana(manaCost, true))
                     {
                         ReleaseBees(player);
                         Projectile.Kill();
@@ -100,6 +101,18 @@ namespace VenninBeeMod.Content.Projectiles
             {
                 Main.projectile[bee].netUpdate = true;
             }
+        }
+
+        private int GetManaCost(Player player)
+        {
+            Item heldItem = player.HeldItem;
+            int baseCost = SoulDripScepter.ManaPerBee;
+            if (heldItem != null && heldItem.type == ModContent.ItemType<SoulDripScepter>())
+            {
+                baseCost = heldItem.mana;
+            }
+
+            return (int)Math.Ceiling(baseCost * player.manaCost);
         }
 
         private int CountChargingBees()
