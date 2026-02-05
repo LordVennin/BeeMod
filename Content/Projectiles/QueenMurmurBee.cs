@@ -64,9 +64,7 @@ namespace VenninBeeMod.Content.Projectiles
             Vector2 desiredVelocity = toTarget * 0.25f;
             Vector2 jitter = Main.rand.NextVector2Circular(1.4f, 1.4f);
             Projectile.velocity = Vector2.Lerp(Projectile.velocity, desiredVelocity, 0.35f) + jitter * 0.1f;
-
-            Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
-            Projectile.spriteDirection = Projectile.velocity.X > 0 ? 1 : -1;
+            UpdateFacing();
             Projectile.tileCollide = false;
             Projectile.timeLeft = 2;
         }
@@ -75,8 +73,7 @@ namespace VenninBeeMod.Content.Projectiles
         {
             Projectile.ai[1]++;
             Projectile.tileCollide = Projectile.ai[1] >= 0f;
-            Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
-            Projectile.spriteDirection = Projectile.velocity.X > 0 ? 1 : -1;
+            UpdateFacing();
         }
 
         private void AnimateFrames()
@@ -92,6 +89,19 @@ namespace VenninBeeMod.Content.Projectiles
         public override bool OnTileCollide(Vector2 oldVelocity)
         {
             return true;
+        }
+
+        private void UpdateFacing()
+        {
+            Projectile.rotation = 0f;
+            if (Projectile.velocity.X > 0.15f)
+            {
+                Projectile.spriteDirection = 1;
+            }
+            else if (Projectile.velocity.X < -0.15f)
+            {
+                Projectile.spriteDirection = -1;
+            }
         }
     }
 }
