@@ -14,6 +14,11 @@ namespace VenninBeeMod.Content.Projectiles
         private const int ReleaseIgnoreFrames = 10;
         public override string Texture => "VenninBeeMod/Content/Projectiles/BeeFollowerMinion";
 
+        public override void SetStaticDefaults()
+        {
+            Main.projFrames[Projectile.type] = 4;
+        }
+
         public override void SetDefaults()
         {
             Projectile.width = 18;
@@ -24,6 +29,7 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.timeLeft = 2;
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
+            Projectile.hide = true;
         }
 
         public override bool? CanDamage() => false;
