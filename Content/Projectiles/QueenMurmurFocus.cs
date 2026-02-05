@@ -70,8 +70,6 @@ namespace VenninBeeMod.Content.Projectiles
                     int manaCost = GetManaCost(player);
                     if (!player.CheckMana(manaCost, true))
                     {
-                        ReleaseBees(player);
-                        Projectile.Kill();
                         return;
                     }
                     SpawnBee(player);
