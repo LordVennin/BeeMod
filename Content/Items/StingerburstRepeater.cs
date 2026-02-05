@@ -36,7 +36,9 @@ namespace VenninBeeMod.Content.Items
 
         public override bool Shoot(Player player, Terraria.DataStructures.EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            if (type == ProjectileID.WoodenArrowFriendly)
+            bool isWoodenArrow = type == ProjectileID.WoodenArrowFriendly || source.AmmoItemIdUsed == ItemID.WoodenArrow;
+
+            if (isWoodenArrow)
             {
                 type = ModContent.ProjectileType<StingerburstArrow>();
             }
