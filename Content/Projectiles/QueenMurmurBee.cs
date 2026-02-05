@@ -7,6 +7,10 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class QueenMurmurBee : ModProjectile
     {
+        private const float HomingRange = 600f;
+        private const float HomingSpeed = 12f;
+        private const float HomingInertia = 12f;
+
         public override string Texture => "VenninBeeMod/Content/Projectiles/BeeFollowerMinion";
 
         public override void SetStaticDefaults()
@@ -42,7 +46,7 @@ namespace VenninBeeMod.Content.Projectiles
             }
             else
             {
-                ReleasedAI();
+                ReleasedAI(player);
             }
 
             AnimateFrames();
@@ -69,10 +73,20 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.timeLeft = 2;
         }
 
-        private void ReleasedAI()
+        private void ReleasedAI(Player player)
         {
             Projectile.ai[1]++;
             Projectile.tileCollide = Projectile.ai[1] >= 0f;
+            if (HasHivePack(player))
+            {
+                NPC target = FindTarget();
+                if (target != null)
+                {
+                    Vector2 toTarget = target.Center - Projectile.Center;
+                    Vector2 desiredVelocity = toTarget.SafeNormalize(Vector2.Zero) * HomingSpeed;
+                    Projectile.velocity = (Projectile.velocity * (HomingInertia - 1f) + desiredVelocity) / HomingInertia;
+                }
+            }
             UpdateFacing();
         }
 
@@ -102,6 +116,43 @@ namespace VenninBeeMod.Content.Projectiles
             {
                 Projectile.spriteDirection = 1;
             }
+        }
+
+        private NPC FindTarget()
+        {
+            NPC closest = null;
+            float closestDistance = HomingRange;
+
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC npc = Main.npc[i];
+                if (!npc.CanBeChasedBy(this))
+                {
+                    continue;
+                }
+
+                float distance = Vector2.Distance(Projectile.Center, npc.Center);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closest = npc;
+                }
+            }
+
+            return closest;
+        }
+
+        private bool HasHivePack(Player player)
+        {
+            for (int i = 3; i < 10; i++)
+            {
+                if (player.armor[i].type == ItemID.HiveBackpack)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
