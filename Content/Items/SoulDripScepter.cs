@@ -17,20 +17,21 @@ namespace VenninBeeMod.Content.Items
         {
             Item.damage = 36;
             Item.DamageType = DamageClass.Magic;
-            Item.mana = 9;
+            Item.mana = 0;
             Item.width = 36;
             Item.height = 36;
-            Item.useTime = 24;
-            Item.useAnimation = 24;
+            Item.useTime = 10;
+            Item.useAnimation = 10;
             Item.useStyle = ItemUseStyleID.Shoot;
             Item.noMelee = true;
             Item.knockBack = 3f;
             Item.value = Item.buyPrice(gold: 2);
             Item.rare = ItemRarityID.LightRed;
             Item.UseSound = SoundID.Item20;
-            Item.autoReuse = true;
-            Item.shoot = ModContent.ProjectileType<SoulDripBolt>();
-            Item.shootSpeed = 11f;
+            Item.autoReuse = false;
+            Item.channel = true;
+            Item.shoot = ModContent.ProjectileType<QueenMurmurFocus>();
+            Item.shootSpeed = 0f;
         }
 
         public override void AddRecipes()
