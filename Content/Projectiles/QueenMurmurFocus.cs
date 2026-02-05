@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
@@ -105,12 +106,13 @@ namespace VenninBeeMod.Content.Projectiles
         private int GetManaCost(Player player)
         {
             Item heldItem = player.HeldItem;
+            int baseCost = SoulDripScepter.ManaPerBee;
             if (heldItem != null && heldItem.type == ModContent.ItemType<SoulDripScepter>())
             {
-                return heldItem.mana;
+                baseCost = heldItem.mana;
             }
 
-            return SoulDripScepter.ManaPerBee;
+            return (int)Math.Ceiling(baseCost * player.manaCost);
         }
 
         private int CountChargingBees()
