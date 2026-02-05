@@ -81,7 +81,8 @@ namespace VenninBeeMod.Content.Projectiles
 
         private void HandleStreamFire(Player player, int beeCount)
         {
-            if (player.altFunctionUse != 2 || beeCount == 0)
+            bool wantsStream = Projectile.owner == Main.myPlayer && Main.mouseRight;
+            if (!wantsStream || beeCount == 0)
             {
                 Projectile.localAI[1] = 0f;
                 return;

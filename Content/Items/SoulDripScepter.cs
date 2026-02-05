@@ -47,9 +47,5 @@ namespace VenninBeeMod.Content.Items
                 .Register();
         }
 
-        public override bool AltFunctionUse(Player player)
-        {
-            return true;
-        }
     }
 }
