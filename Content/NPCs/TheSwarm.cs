@@ -9,7 +9,7 @@ namespace VenninBeeMod.Content.NPCs
 {
     public class TheSwarm : ModNPC
     {
-        private const int MaxSwarmBees = 16;
+        private const int MaxSwarmBees = 75;
         private ref float AttackTimer => ref NPC.ai[0];
         private ref float AttackState => ref NPC.ai[1];
         private ref float HasDashed => ref NPC.localAI[1];
@@ -76,7 +76,7 @@ namespace VenninBeeMod.Content.NPCs
             }
 
             float lifeRatio = NPC.life / (float)NPC.lifeMax;
-            int desiredSwarm = (int)MathHelper.Lerp(4f, MaxSwarmBees, lifeRatio);
+            int desiredSwarm = MaxSwarmBees;
             NPC.localAI[0] = desiredSwarm;
             SpawnSwarmBees(desiredSwarm);
 
@@ -117,7 +117,7 @@ namespace VenninBeeMod.Content.NPCs
             float speed = MathHelper.Lerp(5.2f, 3.5f, 1f - lifeRatio);
             NPC.velocity = Vector2.Lerp(NPC.velocity, toTarget.SafeNormalize(Vector2.UnitY) * speed, 0.1f);
 
-            int fireRate = (int)MathHelper.Lerp(36f, 24f, 1f - lifeRatio);
+            int fireRate = (int)MathHelper.Lerp(70f, 46f, 1f - lifeRatio);
             if (AttackTimer % fireRate == 0f && Main.netMode != NetmodeID.MultiplayerClient)
             {
                 LaunchOrbitingBees(player);
@@ -146,7 +146,7 @@ namespace VenninBeeMod.Content.NPCs
                 bee.netUpdate = true;
 
                 launches++;
-                if (launches >= 2)
+                if (launches >= 1)
                     break;
             }
         }
@@ -192,7 +192,7 @@ namespace VenninBeeMod.Content.NPCs
             if (activeBees >= desiredSwarm)
                 return;
 
-            int toSpawn = Utils.Clamp(desiredSwarm - activeBees, 0, 2);
+            int toSpawn = desiredSwarm - activeBees;
             for (int i = 0; i < toSpawn; i++)
             {
                 Vector2 spawnOffset = Main.rand.NextVector2Circular(90f, 90f);
