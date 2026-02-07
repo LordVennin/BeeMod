@@ -84,7 +84,7 @@ namespace VenninBeeMod.Content.NPCs
             if (AttackState == 0f)
             {
                 DoHoverAndShoot(player, lifeRatio);
-                if (AttackTimer >= 150f)
+                if (AttackTimer >= 1500f)
                 {
                     AttackTimer = 0f;
                     AttackState = 1f;
@@ -112,7 +112,7 @@ namespace VenninBeeMod.Content.NPCs
         {
             NPC.damage = 10;
 
-            Vector2 hoverTarget = player.Center + new Vector2(0f, -220f + (1f - lifeRatio) * 70f);
+            Vector2 hoverTarget = player.Center + new Vector2(0f, -340f + (1f - lifeRatio) * 70f);
             Vector2 toTarget = hoverTarget - NPC.Center;
             float speed = MathHelper.Lerp(5.2f, 3.5f, 1f - lifeRatio);
             NPC.velocity = Vector2.Lerp(NPC.velocity, toTarget.SafeNormalize(Vector2.UnitY) * speed, 0.1f);
@@ -120,15 +120,34 @@ namespace VenninBeeMod.Content.NPCs
             int fireRate = (int)MathHelper.Lerp(36f, 24f, 1f - lifeRatio);
             if (AttackTimer % fireRate == 0f && Main.netMode != NetmodeID.MultiplayerClient)
             {
-                Vector2 spawnOffset = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitY) * 20f;
-                int bee = NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + spawnOffset.X), (int)(NPC.Center.Y + spawnOffset.Y), ModContent.NPCType<SwarmBeeMinion>(), ai0: NPC.whoAmI, ai1: 1f);
-                if (bee >= 0)
-                {
-                    Main.npc[bee].velocity = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitY) * 9f;
-                    Main.npc[bee].netUpdate = true;
-                }
+                LaunchOrbitingBees(player);
 
                 SoundEngine.PlaySound(SoundID.Item17, NPC.Center);
+            }
+        }
+
+        private void LaunchOrbitingBees(Player player)
+        {
+            int launches = 0;
+            Vector2 launchDirection = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitY);
+
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC bee = Main.npc[i];
+                if (!bee.active || bee.type != ModContent.NPCType<SwarmBeeMinion>())
+                    continue;
+
+                if ((int)bee.ai[0] != NPC.whoAmI || bee.ai[1] == 1f)
+                    continue;
+
+                bee.ai[1] = 1f;
+                bee.localAI[1] = 0f;
+                bee.velocity = launchDirection * Main.rand.NextFloat(8f, 10f);
+                bee.netUpdate = true;
+
+                launches++;
+                if (launches >= 2)
+                    break;
             }
         }
 
@@ -195,8 +214,7 @@ namespace VenninBeeMod.Content.NPCs
 
         public override bool? DrawHealthBar(byte hbPosition, ref float scale, ref Vector2 position)
         {
-            scale = 1.25f;
-            return true;
+            return null;
         }
     }
 }
