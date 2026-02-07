@@ -156,8 +156,14 @@ namespace VenninBeeMod.Content.NPCs
                 {
                     Player player = Main.player[NPC.target];
                     Vector2 toPlayer = player.Center - NPC.Center;
-                    float speed = 4.2f;
-                    NPC.velocity = Vector2.Lerp(NPC.velocity, toPlayer.SafeNormalize(Vector2.Zero) * speed, 0.1f);
+
+                    // Aim a bit past the player's center so the bee doesn't lock perfectly inside them.
+                    Vector2 attackTarget = player.Center + toPlayer.SafeNormalize(Vector2.Zero) * 22f;
+                    Vector2 toAttackTarget = attackTarget - NPC.Center;
+
+                    // Slightly slower attack movement keeps the bee from over-sticking on contact.
+                    float speed = 3.5f;
+                    NPC.velocity = Vector2.Lerp(NPC.velocity, toAttackTarget.SafeNormalize(Vector2.Zero) * speed, 0.1f);
                 }
                 else
                 {
