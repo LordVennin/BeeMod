@@ -55,20 +55,36 @@ namespace VenninBeeMod.Content.NPCs
                 return;
             }
 
-            Player player = Main.player[boss.target];
-            if (!player.active || player.dead)
-                player = Main.player[Player.FindClosest(NPC.Center, NPC.width, NPC.height)];
+            int targetPlayerIndex = (int)NPC.ai[2];
+            if (targetPlayerIndex < 0 || targetPlayerIndex >= Main.maxPlayers)
+                targetPlayerIndex = boss.target;
+
+            Player targetPlayer = Main.player[targetPlayerIndex];
+            if (!targetPlayer.active || targetPlayer.dead)
+            {
+                targetPlayerIndex = Player.FindClosest(NPC.Center, NPC.width, NPC.height);
+                targetPlayer = Main.player[targetPlayerIndex];
+            }
 
             bool launched = NPC.ai[1] == 1f;
 
             if (launched)
             {
                 NPC.localAI[1]++;
-                if (NPC.localAI[1] > 90f)
-                    NPC.ai[1] = 0f;
 
-                Vector2 chase = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitY) * 8.5f;
-                NPC.velocity = Vector2.Lerp(NPC.velocity, chase, 0.1f);
+                bool returningToBoss = NPC.localAI[1] > 45f;
+                if (NPC.localAI[1] > 90f)
+                {
+                    NPC.ai[1] = 0f;
+                    NPC.localAI[1] = 0f;
+                    NPC.netUpdate = true;
+                }
+
+                Vector2 flightTarget = returningToBoss ? boss.Center : targetPlayer.Center;
+                float flightSpeed = returningToBoss ? 10f : 8.5f;
+                float flightInertia = returningToBoss ? 0.18f : 0.1f;
+                Vector2 chase = (flightTarget - NPC.Center).SafeNormalize(Vector2.UnitY) * flightSpeed;
+                NPC.velocity = Vector2.Lerp(NPC.velocity, chase, flightInertia);
                 NPC.spriteDirection = NPC.direction = (NPC.velocity.X > 0f).ToDirectionInt();
                 NPC.timeLeft = 180;
                 return;
