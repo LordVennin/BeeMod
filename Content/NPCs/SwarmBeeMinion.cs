@@ -7,8 +7,8 @@ namespace VenninBeeMod.Content.NPCs
 {
     public class SwarmBeeMinion : ModNPC
     {
-        private const int OrbitingDefense = 6;
-        private const int LaunchedDefense = 0;
+        private const int OrbitingDefense = 10;
+        private const int LaunchedDefense = -5;
 
         public override string Texture => "VenninBeeMod/Content/NPCs/StickyResinBee";
 
@@ -24,7 +24,7 @@ namespace VenninBeeMod.Content.NPCs
             NPC.aiStyle = -1;
             NPC.damage = 10;
             NPC.defense = OrbitingDefense;
-            NPC.lifeMax = 22;
+            NPC.lifeMax = 19;
             NPC.knockBackResist = 0.6f;
             NPC.noGravity = true;
             NPC.noTileCollide = true;
