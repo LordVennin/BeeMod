@@ -76,17 +76,15 @@ namespace VenninBeeMod.Content.NPCs
 
             if (NPC.localAI[0] == 0f)
             {
-                NPC.localAI[0] = Main.rand.NextFloat(24f, 56f);
+                NPC.localAI[0] = 32f + (NPC.whoAmI % 18);
                 NPC.netUpdate = true;
             }
 
-            float orbitAngle = (Main.GameUpdateCount * 0.11f) + (NPC.whoAmI * 0.45f);
+            float orbitAngle = (Main.GameUpdateCount * 0.08f) + (NPC.whoAmI * 0.42f);
             float orbitRadius = NPC.localAI[0];
             Vector2 orbitPoint = boss.Center + orbitAngle.ToRotationVector2() * orbitRadius;
-
-            Vector2 aggressivePoint = Vector2.Lerp(orbitPoint, player.Center, 0.2f);
-            Vector2 toPoint = aggressivePoint - NPC.Center;
-            NPC.velocity = Vector2.Lerp(NPC.velocity, toPoint.SafeNormalize(Vector2.UnitX) * 6.8f, 0.12f);
+            Vector2 toPoint = orbitPoint - NPC.Center;
+            NPC.velocity = Vector2.Lerp(NPC.velocity, toPoint.SafeNormalize(Vector2.UnitX) * 8.2f, 0.2f);
 
             NPC.spriteDirection = NPC.direction = (NPC.velocity.X > 0f).ToDirectionInt();
             NPC.timeLeft = 60;
