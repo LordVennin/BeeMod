@@ -112,7 +112,11 @@ namespace VenninBeeMod.Content.NPCs
         {
             NPC.damage = 10;
 
-            Vector2 hoverTarget = player.Center + new Vector2(0f, -340f + (1f - lifeRatio) * 70f);
+            float hoverHeight = -340f + (1f - lifeRatio) * 70f;
+            float lateralBob = (float)System.Math.Sin((AttackTimer * 0.055f) + (NPC.whoAmI * 0.9f)) * 86f;
+            float verticalBob = (float)System.Math.Cos((AttackTimer * 0.082f) + (NPC.whoAmI * 0.47f)) * 22f;
+
+            Vector2 hoverTarget = player.Center + new Vector2(lateralBob, hoverHeight + verticalBob);
             Vector2 toTarget = hoverTarget - NPC.Center;
             float speed = MathHelper.Lerp(5.2f, 3.5f, 1f - lifeRatio);
             NPC.velocity = Vector2.Lerp(NPC.velocity, toTarget.SafeNormalize(Vector2.UnitY) * speed, 0.1f);
