@@ -82,9 +82,9 @@ namespace VenninBeeMod.Content.NPCs
 
                 Vector2 flightTarget = returningToBoss ? boss.Center : targetPlayer.Center;
                 float flightSpeed = returningToBoss ? 10f : 8.5f;
-                float inertia = returningToBoss ? 0.18f : 0.1f;
+                float flightInertia = returningToBoss ? 0.18f : 0.1f;
                 Vector2 chase = (flightTarget - NPC.Center).SafeNormalize(Vector2.UnitY) * flightSpeed;
-                NPC.velocity = Vector2.Lerp(NPC.velocity, chase, inertia);
+                NPC.velocity = Vector2.Lerp(NPC.velocity, chase, flightInertia);
                 NPC.spriteDirection = NPC.direction = (NPC.velocity.X > 0f).ToDirectionInt();
                 NPC.timeLeft = 180;
                 return;
