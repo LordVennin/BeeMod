@@ -12,7 +12,7 @@ namespace VenninBeeMod.Content.NPCs
         private const int MaxSwarmBees = 75;
         private ref float AttackTimer => ref NPC.ai[0];
         private ref float AttackState => ref NPC.ai[1];
-        private ref float HasDashed => ref NPC.localAI[1];
+        private ref float HasDashed => ref NPC.ai[2];
 
         public override string Texture => "VenninBeeMod/Content/NPCs/StickyResinBee";
 
@@ -76,9 +76,7 @@ namespace VenninBeeMod.Content.NPCs
             }
 
             float lifeRatio = NPC.life / (float)NPC.lifeMax;
-            int desiredSwarm = MaxSwarmBees;
-            NPC.localAI[0] = desiredSwarm;
-            SpawnSwarmBees(desiredSwarm);
+            SpawnSwarmBees(MaxSwarmBees);
 
             AttackTimer++;
             if (AttackState == 0f)
@@ -146,7 +144,7 @@ namespace VenninBeeMod.Content.NPCs
 
                 bee.ai[1] = 1f;
                 bee.ai[2] = player.whoAmI;
-                bee.localAI[1] = 0f;
+                bee.ai[3] = 0f;
                 bee.velocity = launchDirection * Main.rand.NextFloat(8f, 10f);
                 bee.netUpdate = true;
 
