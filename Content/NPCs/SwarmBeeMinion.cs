@@ -55,28 +55,42 @@ namespace VenninBeeMod.Content.NPCs
                 return;
             }
 
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                int serverTarget = (int)NPC.ai[2];
+                if (serverTarget < 0 || serverTarget >= Main.maxPlayers)
+                    serverTarget = boss.target;
+
+                Player serverTargetPlayer = Main.player[serverTarget];
+                if (!serverTargetPlayer.active || serverTargetPlayer.dead)
+                    serverTarget = Player.FindClosest(NPC.Center, NPC.width, NPC.height);
+
+                if ((int)NPC.ai[2] != serverTarget)
+                {
+                    NPC.ai[2] = serverTarget;
+                    NPC.netUpdate = true;
+                }
+            }
+
             int targetPlayerIndex = (int)NPC.ai[2];
             if (targetPlayerIndex < 0 || targetPlayerIndex >= Main.maxPlayers)
                 targetPlayerIndex = boss.target;
 
             Player targetPlayer = Main.player[targetPlayerIndex];
             if (!targetPlayer.active || targetPlayer.dead)
-            {
-                targetPlayerIndex = Player.FindClosest(NPC.Center, NPC.width, NPC.height);
-                targetPlayer = Main.player[targetPlayerIndex];
-            }
+                targetPlayer = Main.player[Player.FindClosest(NPC.Center, NPC.width, NPC.height)];
 
             bool launched = NPC.ai[1] == 1f;
 
             if (launched)
             {
-                NPC.localAI[1]++;
+                NPC.ai[3]++;
 
-                bool returningToBoss = NPC.localAI[1] > 45f;
-                if (NPC.localAI[1] > 90f)
+                bool returningToBoss = NPC.ai[3] > 45f;
+                if (NPC.ai[3] > 90f)
                 {
                     NPC.ai[1] = 0f;
-                    NPC.localAI[1] = 0f;
+                    NPC.ai[3] = 0f;
                     NPC.netUpdate = true;
                 }
 
@@ -90,14 +104,8 @@ namespace VenninBeeMod.Content.NPCs
                 return;
             }
 
-            if (NPC.localAI[0] == 0f)
-            {
-                NPC.localAI[0] = Main.rand.NextFloat(MathHelper.TwoPi);
-                NPC.netUpdate = true;
-            }
-
             float time = Main.GameUpdateCount;
-            float baseAngle = (time * 0.075f) + NPC.localAI[0] + (NPC.whoAmI * 0.13f);
+            float baseAngle = (time * 0.075f) + (NPC.whoAmI * 0.13f);
             float chaosAngle = baseAngle + (float)System.Math.Sin((time * 0.11f) + (NPC.whoAmI * 0.37f)) * 0.85f;
             float radiusNoise = (float)System.Math.Sin((time * 0.09f) + (NPC.whoAmI * 1.21f));
             float radiusPulse = (float)System.Math.Cos((time * 0.16f) + (NPC.whoAmI * 0.73f)) * 6f;
