@@ -7,6 +7,9 @@ namespace VenninBeeMod.Content.NPCs
 {
     public class SwarmBeeMinion : ModNPC
     {
+        private const int OrbitingDefense = 6;
+        private const int LaunchedDefense = 0;
+
         public override string Texture => "VenninBeeMod/Content/NPCs/StickyResinBee";
 
         public override void SetStaticDefaults()
@@ -20,7 +23,7 @@ namespace VenninBeeMod.Content.NPCs
             NPC.height = 18;
             NPC.aiStyle = -1;
             NPC.damage = 10;
-            NPC.defense = 0;
+            NPC.defense = OrbitingDefense;
             NPC.lifeMax = 22;
             NPC.knockBackResist = 0.6f;
             NPC.noGravity = true;
@@ -81,6 +84,7 @@ namespace VenninBeeMod.Content.NPCs
                 targetPlayer = Main.player[Player.FindClosest(NPC.Center, NPC.width, NPC.height)];
 
             bool launched = NPC.ai[1] == 1f;
+            NPC.defense = launched ? LaunchedDefense : OrbitingDefense;
 
             if (launched)
             {
