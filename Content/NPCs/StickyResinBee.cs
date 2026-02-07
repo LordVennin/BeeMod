@@ -156,8 +156,19 @@ namespace VenninBeeMod.Content.NPCs
                 {
                     Player player = Main.player[NPC.target];
                     Vector2 toPlayer = player.Center - NPC.Center;
-                    float speed = 4.2f;
-                    NPC.velocity = Vector2.Lerp(NPC.velocity, toPlayer.SafeNormalize(Vector2.Zero) * speed, 0.1f);
+
+                    // Keep momentum near the player so attacks pass through instead of re-centering.
+                    Vector2 approachDirection = toPlayer.SafeNormalize(Vector2.UnitX * NPC.direction);
+                    bool closeToPlayer = toPlayer.LengthSquared() < 28f * 28f;
+                    if (closeToPlayer && NPC.velocity.LengthSquared() > 0.04f)
+                        approachDirection = NPC.velocity.SafeNormalize(approachDirection);
+
+                    // Aim farther past the player to force a fly-through attack path.
+                    Vector2 attackTarget = player.Center + approachDirection * 56f;
+                    Vector2 toAttackTarget = attackTarget - NPC.Center;
+
+                    float speed = 3.9f;
+                    NPC.velocity = Vector2.Lerp(NPC.velocity, toAttackTarget.SafeNormalize(approachDirection) * speed, 0.16f);
                 }
                 else
                 {
