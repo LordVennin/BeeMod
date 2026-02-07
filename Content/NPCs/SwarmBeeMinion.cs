@@ -59,19 +59,34 @@ namespace VenninBeeMod.Content.NPCs
             if (!player.active || player.dead)
                 player = Main.player[Player.FindClosest(NPC.Center, NPC.width, NPC.height)];
 
+            bool launched = NPC.ai[1] == 1f;
+
+            if (launched)
+            {
+                NPC.localAI[1]++;
+                if (NPC.localAI[1] > 90f)
+                    NPC.ai[1] = 0f;
+
+                Vector2 chase = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitY) * 8.5f;
+                NPC.velocity = Vector2.Lerp(NPC.velocity, chase, 0.1f);
+                NPC.spriteDirection = NPC.direction = (NPC.velocity.X > 0f).ToDirectionInt();
+                NPC.timeLeft = 180;
+                return;
+            }
+
             if (NPC.localAI[0] == 0f)
             {
-                NPC.localAI[0] = Main.rand.NextFloat(30f, 90f);
+                NPC.localAI[0] = Main.rand.NextFloat(24f, 56f);
                 NPC.netUpdate = true;
             }
 
-            float orbitAngle = (Main.GameUpdateCount * 0.06f) + NPC.whoAmI;
+            float orbitAngle = (Main.GameUpdateCount * 0.11f) + (NPC.whoAmI * 0.45f);
             float orbitRadius = NPC.localAI[0];
             Vector2 orbitPoint = boss.Center + orbitAngle.ToRotationVector2() * orbitRadius;
 
-            Vector2 aggressivePoint = Vector2.Lerp(orbitPoint, player.Center, 0.35f);
+            Vector2 aggressivePoint = Vector2.Lerp(orbitPoint, player.Center, 0.2f);
             Vector2 toPoint = aggressivePoint - NPC.Center;
-            NPC.velocity = Vector2.Lerp(NPC.velocity, toPoint.SafeNormalize(Vector2.UnitX) * 5.6f, 0.07f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, toPoint.SafeNormalize(Vector2.UnitX) * 6.8f, 0.12f);
 
             NPC.spriteDirection = NPC.direction = (NPC.velocity.X > 0f).ToDirectionInt();
             NPC.timeLeft = 60;
