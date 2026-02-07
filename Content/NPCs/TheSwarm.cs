@@ -216,6 +216,15 @@ namespace VenninBeeMod.Content.NPCs
             return base.CheckDead();
         }
 
+        public override void OnKill()
+        {
+            int resinAmount = Main.rand.Next(28, 45);
+            Item.NewItem(NPC.GetSource_Loot(), NPC.getRect(), ModContent.ItemType<Items.StickyResin>(), resinAmount);
+
+            int silverAmount = Main.rand.Next(3, 7);
+            Item.NewItem(NPC.GetSource_Loot(), NPC.getRect(), ItemID.SilverCoin, silverAmount);
+        }
+
         public override bool? DrawHealthBar(byte hbPosition, ref float scale, ref Vector2 position)
         {
             return null;
