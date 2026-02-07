@@ -7,7 +7,6 @@ using Terraria.ModLoader;
 
 namespace VenninBeeMod.Content.NPCs
 {
-    [AutoloadBossHead]
     public class TheSwarm : ModNPC
     {
         private const int MaxSwarmBees = 16;
