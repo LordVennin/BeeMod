@@ -131,6 +131,7 @@ namespace VenninBeeMod.Content.NPCs
         private void LaunchOrbitingBees(Player player)
         {
             int launches = 0;
+            int maxLaunches = Main.rand.Next(1, 3);
             Vector2 launchDirection = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitY);
 
             for (int i = 0; i < Main.maxNPCs; i++)
@@ -149,7 +150,7 @@ namespace VenninBeeMod.Content.NPCs
                 bee.netUpdate = true;
 
                 launches++;
-                if (launches >= 1)
+                if (launches >= maxLaunches)
                     break;
             }
         }
