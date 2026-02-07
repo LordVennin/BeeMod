@@ -145,6 +145,7 @@ namespace VenninBeeMod.Content.NPCs
                     continue;
 
                 bee.ai[1] = 1f;
+                bee.ai[2] = player.whoAmI;
                 bee.localAI[1] = 0f;
                 bee.velocity = launchDirection * Main.rand.NextFloat(8f, 10f);
                 bee.netUpdate = true;
