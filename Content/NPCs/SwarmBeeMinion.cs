@@ -8,7 +8,7 @@ namespace VenninBeeMod.Content.NPCs
     public class SwarmBeeMinion : ModNPC
     {
         private const int OrbitingDefense = 10;
-        private const int LaunchedDefense = -5;
+        private const int LaunchedDefense = -4;
 
         public override string Texture => "VenninBeeMod/Content/NPCs/StickyResinBee";
 
