@@ -76,17 +76,22 @@ namespace VenninBeeMod.Content.NPCs
 
             if (NPC.localAI[0] == 0f)
             {
-                NPC.localAI[0] = Main.rand.NextFloat(24f, 56f);
+                NPC.localAI[0] = Main.rand.NextFloat(MathHelper.TwoPi);
                 NPC.netUpdate = true;
             }
 
-            float orbitAngle = (Main.GameUpdateCount * 0.11f) + (NPC.whoAmI * 0.45f);
-            float orbitRadius = NPC.localAI[0];
-            Vector2 orbitPoint = boss.Center + orbitAngle.ToRotationVector2() * orbitRadius;
+            float time = Main.GameUpdateCount;
+            float baseAngle = (time * 0.075f) + NPC.localAI[0] + (NPC.whoAmI * 0.13f);
+            float chaosAngle = baseAngle + (float)System.Math.Sin((time * 0.11f) + (NPC.whoAmI * 0.37f)) * 0.85f;
+            float radiusNoise = (float)System.Math.Sin((time * 0.09f) + (NPC.whoAmI * 1.21f));
+            float radiusPulse = (float)System.Math.Cos((time * 0.16f) + (NPC.whoAmI * 0.73f)) * 6f;
+            float radius = MathHelper.Clamp(22f + (radiusNoise * 18f) + radiusPulse, 10f, 46f);
 
-            Vector2 aggressivePoint = Vector2.Lerp(orbitPoint, player.Center, 0.2f);
-            Vector2 toPoint = aggressivePoint - NPC.Center;
-            NPC.velocity = Vector2.Lerp(NPC.velocity, toPoint.SafeNormalize(Vector2.UnitX) * 6.8f, 0.12f);
+            Vector2 swarmPoint = boss.Center + chaosAngle.ToRotationVector2() * radius;
+            Vector2 toPoint = swarmPoint - NPC.Center;
+            float seekSpeed = 6.2f + ((NPC.whoAmI % 7) * 0.2f);
+            float inertia = 0.18f + ((NPC.whoAmI % 5) * 0.02f);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, toPoint.SafeNormalize(Vector2.UnitX) * seekSpeed, inertia);
 
             NPC.spriteDirection = NPC.direction = (NPC.velocity.X > 0f).ToDirectionInt();
             NPC.timeLeft = 60;
