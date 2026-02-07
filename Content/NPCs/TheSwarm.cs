@@ -12,6 +12,7 @@ namespace VenninBeeMod.Content.NPCs
         private const int MaxSwarmBees = 16;
         private ref float AttackTimer => ref NPC.ai[0];
         private ref float AttackState => ref NPC.ai[1];
+        private ref float HasDashed => ref NPC.localAI[1];
 
         public override string Texture => "VenninBeeMod/Content/NPCs/StickyResinBee";
 
@@ -19,6 +20,7 @@ namespace VenninBeeMod.Content.NPCs
         {
             Main.npcFrameCount[NPC.type] = Main.npcFrameCount[ModContent.NPCType<StickyResinBee>()];
             NPCID.Sets.MPAllowedEnemies[NPC.type] = true;
+            NPCID.Sets.ShouldBeCountedAsBoss[NPC.type] = true;
         }
 
         public override void SetDefaults()
@@ -86,16 +88,18 @@ namespace VenninBeeMod.Content.NPCs
                 {
                     AttackTimer = 0f;
                     AttackState = 1f;
+                    HasDashed = 0f;
                     NPC.netUpdate = true;
                 }
             }
             else
             {
-                DoChargeAttack(player);
-                if (AttackTimer >= 45f)
+                DoSwoopAttack(player, lifeRatio);
+                if (AttackTimer >= 72f)
                 {
                     AttackTimer = 0f;
                     AttackState = 0f;
+                    HasDashed = 0f;
                     NPC.netUpdate = true;
                 }
             }
@@ -106,33 +110,51 @@ namespace VenninBeeMod.Content.NPCs
 
         private void DoHoverAndShoot(Player player, float lifeRatio)
         {
-            NPC.damage = 8;
+            NPC.damage = 10;
 
-            Vector2 hoverTarget = player.Center + new Vector2(player.direction * -140f, -120f + (1f - lifeRatio) * 90f);
+            Vector2 hoverTarget = player.Center + new Vector2(0f, -220f + (1f - lifeRatio) * 70f);
             Vector2 toTarget = hoverTarget - NPC.Center;
-            float speed = MathHelper.Lerp(4f, 2.3f, 1f - lifeRatio);
-            NPC.velocity = Vector2.Lerp(NPC.velocity, toTarget.SafeNormalize(Vector2.UnitY) * speed, 0.08f);
+            float speed = MathHelper.Lerp(5.2f, 3.5f, 1f - lifeRatio);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, toTarget.SafeNormalize(Vector2.UnitY) * speed, 0.1f);
 
             int fireRate = (int)MathHelper.Lerp(36f, 24f, 1f - lifeRatio);
             if (AttackTimer % fireRate == 0f && Main.netMode != NetmodeID.MultiplayerClient)
             {
-                Vector2 vel = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX) * 5.5f;
-                Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, vel, ModContent.ProjectileType<Projectiles.SwarmResinBeeProjectile>(), 12, 1f);
+                Vector2 spawnOffset = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitY) * 20f;
+                int bee = NPC.NewNPC(NPC.GetSource_FromAI(), (int)(NPC.Center.X + spawnOffset.X), (int)(NPC.Center.Y + spawnOffset.Y), ModContent.NPCType<SwarmBeeMinion>(), ai0: NPC.whoAmI, ai1: 1f);
+                if (bee >= 0)
+                {
+                    Main.npc[bee].velocity = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitY) * 9f;
+                    Main.npc[bee].netUpdate = true;
+                }
+
                 SoundEngine.PlaySound(SoundID.Item17, NPC.Center);
             }
         }
 
-        private void DoChargeAttack(Player player)
+        private void DoSwoopAttack(Player player, float lifeRatio)
         {
-            if (AttackTimer == 1f)
+            Vector2 prepPoint = player.Center + new Vector2(player.velocity.X * 20f, -270f + lifeRatio * 80f);
+            if (AttackTimer < 28f)
             {
-                Vector2 dashVelocity = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitY) * 11f;
-                NPC.velocity = dashVelocity;
-                SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
+                Vector2 toPrep = prepPoint - NPC.Center;
+                NPC.velocity = Vector2.Lerp(NPC.velocity, toPrep.SafeNormalize(Vector2.UnitY) * 7.5f, 0.12f);
+                NPC.damage = 8;
+                return;
             }
 
-            NPC.damage = 20;
-            NPC.velocity *= 0.985f;
+            if (HasDashed == 0f)
+            {
+                Vector2 swoopTarget = player.Center + new Vector2(player.velocity.X * 18f, 32f);
+                NPC.velocity = (swoopTarget - NPC.Center).SafeNormalize(Vector2.UnitY) * 14.5f;
+                NPC.damage = 24;
+                HasDashed = 1f;
+                SoundEngine.PlaySound(SoundID.Roar, NPC.Center);
+                NPC.netUpdate = true;
+            }
+
+            NPC.damage = 24;
+            NPC.velocity *= 0.99f;
         }
 
         private void SpawnSwarmBees(int desiredSwarm)
@@ -169,6 +191,12 @@ namespace VenninBeeMod.Content.NPCs
                 return true;
 
             return base.CheckDead();
+        }
+
+        public override bool? DrawHealthBar(byte hbPosition, ref float scale, ref Vector2 position)
+        {
+            scale = 1.25f;
+            return true;
         }
     }
 }
