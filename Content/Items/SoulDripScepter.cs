@@ -22,6 +22,8 @@ namespace VenninBeeMod.Content.Items
             Item.mana = ManaPerBee;
             Item.width = 36;
             Item.height = 36;
+            // The sprite is 128x128; draw the held/world item at quarter size.
+            Item.scale = 0.25f;
             Item.useTime = 10;
             Item.useAnimation = 10;
             Item.useStyle = ItemUseStyleID.Shoot;
