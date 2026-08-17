@@ -17,8 +17,9 @@ namespace VenninBeeMod.Content.Items
         {
             Item.damage = 48;
             Item.DamageType = DamageClass.Melee;
-            Item.width = 44;
-            Item.height = 44;
+            // Must match the texture (128x128) or the blade detaches from the hand mid-swing.
+            Item.width = 128;
+            Item.height = 128;
             Item.useTime = 30;
             Item.useAnimation = 30;
             Item.useStyle = ItemUseStyleID.Swing;

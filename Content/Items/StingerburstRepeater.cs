@@ -18,8 +18,10 @@ namespace VenninBeeMod.Content.Items
         {
             Item.damage = 34;
             Item.DamageType = DamageClass.Ranged;
-            Item.width = 34;
-            Item.height = 60;
+            // Must match the texture (113x54) or the held sprite sits wrong in the hand.
+            Item.width = 113;
+            Item.height = 54;
+            Item.scale = 0.7f;
             Item.useTime = 18;
             Item.useAnimation = 18;
             Item.useStyle = ItemUseStyleID.Shoot;
