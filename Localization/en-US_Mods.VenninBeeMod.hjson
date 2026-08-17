@@ -1,4 +1,13 @@
 Items: {
+	BuzzKill: {
+		DisplayName: Buzz Kill
+		Tooltip:
+			'''
+			Sprays fifteen heavy honey pellets in a wide arc
+			Every pellet that lands hatches a bee that hunts what it hit
+			'''
+	}
+
 	StingerLance: {
 		DisplayName: Hive Lance
 		Tooltip: Hold left click to shake out bees. Right click thrusts the hive forward.
@@ -194,6 +203,8 @@ Projectiles: {
 	HealingBee.DisplayName: Healing Bee
 	RoyalBeeOrbiter.DisplayName: Royal Bee Orbiter
 	HoneySlashProjectile.DisplayName: Honey Slash Projectile
+	BuzzKillPellet.DisplayName: Honey Shot
+	BuzzKillBee.DisplayName: Buzz Kill Bee
 }
 
 Mods.VenninBeeMod.Tiles.FallingTreeHiveTile.MapEntry: Falling Tree Hive
