@@ -199,3 +199,5 @@ Projectiles: {
 Mods.VenninBeeMod.Tiles.FallingTreeHiveTile.MapEntry: Falling Tree Hive
 Tiles.TreeHiveTile.MapEntry: Tree Hive Tile
 NPCs.StickyResinBee.DisplayName: Sticky Resin Bee
+NPCs.TheSwarm.DisplayName: The Swarm
+NPCs.SwarmBeeMinion.DisplayName: Swarm Bee

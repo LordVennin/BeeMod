@@ -125,6 +125,13 @@ namespace VenninBeeMod.Content.NPCs
             NPC.timeLeft = 60;
         }
 
+        public override bool? DrawHealthBar(byte hbPosition, ref float scale, ref Vector2 position)
+        {
+            // Up to 75 of these orbit the queen at once; drawing a bar for each one
+            // buries The Swarm's own health bar under a wall of tiny bars.
+            return false;
+        }
+
         public override void OnKill()
         {
             int bossIndex = (int)NPC.ai[0];

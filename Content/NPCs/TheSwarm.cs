@@ -10,6 +10,13 @@ namespace VenninBeeMod.Content.NPCs
     public class TheSwarm : ModNPC
     {
         private const int MaxSwarmBees = 75;
+
+        /// <summary>
+        /// How far the in-world health bar is pushed away from the queen so it clears the
+        /// ball of orbiting bees (see <see cref="SwarmBeeMinion"/>, max orbit radius 46).
+        /// </summary>
+        private const float HealthBarClearance = 58f;
+
         private ref float AttackTimer => ref NPC.ai[0];
         private ref float AttackState => ref NPC.ai[1];
         private ref float HasDashed => ref NPC.ai[2];
@@ -39,6 +46,7 @@ namespace VenninBeeMod.Content.NPCs
             NPC.DeathSound = SoundID.NPCDeath14;
             NPC.boss = true;
             NPC.npcSlots = 15f;
+            NPC.BossBar = ModContent.GetInstance<TheSwarmBossBar>();
             Music = MusicID.Boss1;
         }
 
@@ -227,7 +235,12 @@ namespace VenninBeeMod.Content.NPCs
 
         public override bool? DrawHealthBar(byte hbPosition, ref float scale, ref Vector2 position)
         {
-            return null;
+            // Boss-sized bar, kept clear of the bee cloud that hides the queen.
+            scale = 1.5f;
+            position.X = NPC.Center.X;
+            position.Y += hbPosition == 1 ? HealthBarClearance : -HealthBarClearance;
+
+            return true;
         }
     }
 }
