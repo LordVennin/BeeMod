@@ -7,6 +7,7 @@ using Terraria.ModLoader;
 
 namespace VenninBeeMod.Content.NPCs
 {
+    [AutoloadBossHead]
     public class TheSwarm : ModNPC
     {
         private const int MaxSwarmBees = 75;
@@ -22,6 +23,10 @@ namespace VenninBeeMod.Content.NPCs
         private ref float HasDashed => ref NPC.ai[2];
 
         public override string Texture => "VenninBeeMod/Content/NPCs/StickyResinBee";
+
+        // Texture is borrowed from StickyResinBee, so the default "<Texture>_Head_Boss"
+        // lookup would collide with it. Point the map icon at our own file instead.
+        public override string BossHeadTexture => "VenninBeeMod/Content/NPCs/TheSwarm_Head_Boss";
 
         public override void SetStaticDefaults()
         {
