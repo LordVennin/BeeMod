@@ -8,7 +8,7 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class QueenMurmurFocus : ModProjectile
     {
-        private const int MaxBees = 50;
+        private const int MaxBees = 40;
         private const int BeeSpawnInterval = 6;
         private const int StreamInterval = 5;
         private const int ReleaseIgnoreFrames = 10;
