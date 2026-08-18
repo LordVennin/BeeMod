@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using VenninBeeMod.Content.Buffs;
 
 namespace VenninBeeMod.Content.Projectiles
 {
@@ -11,6 +12,9 @@ namespace VenninBeeMod.Content.Projectiles
     /// </summary>
     public class RiftStinger : ModProjectile
     {
+        private const int PoisonDuration = 240;
+
+
         public override void SetDefaults()
         {
             Projectile.width = 8;
@@ -35,6 +39,11 @@ namespace VenninBeeMod.Content.Projectiles
                     DustID.Smoke, 0f, 0f, 150, new Color(168, 116, 236), 0.6f);
                 trail.noGravity = true;
             }
+        }
+
+        public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            target.AddBuff(ModContent.BuffType<ShadowPoison>(), PoisonDuration);
         }
 
         public override void OnKill(int timeLeft)

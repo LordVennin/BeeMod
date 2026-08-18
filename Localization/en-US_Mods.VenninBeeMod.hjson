@@ -4,7 +4,8 @@ Items: {
 		Tooltip:
 			'''
 			Hold to hang a drone ahead of you that tears a rift open
-			It spits stingers at your cursor, faster the longer you hold the channel
+			It spits shadow poisoned stingers at your cursor in bursts
+			The longer you hold the channel the faster they come
 			'''
 	}
 

@@ -16,9 +16,16 @@ namespace VenninBeeMod.Content.Projectiles
     public class RiftBee : ModProjectile
     {
         // Fire interval walks from the slow end to the fast end over ChargeTime.
-        private const float SlowInterval = 20f;
-        private const float FastInterval = 7f;
+        private const float SlowInterval = 28f;
+        private const float FastInterval = 12f;
         private const float ChargeTime = 150f;
+
+        // Volleys are 1 to 3 stingers, so the interval is slower than a single shot would want.
+        private const int MinVolley = 1;
+        private const int MaxVolley = 3;
+
+        // The item's mana cost is charged once per second for as long as the channel is held.
+        private const int ManaDrainInterval = 60;
 
         private const float HoverDistance = 54f;
         private const float StingerSpeed = 13f;
@@ -26,6 +33,7 @@ namespace VenninBeeMod.Content.Projectiles
 
         private ref float Charge => ref Projectile.ai[0];
         private ref float FireTimer => ref Projectile.ai[1];
+        private ref float ManaTimer => ref Projectile.ai[2];
 
         private Asset<Texture2D> portalTexture;
 
@@ -58,6 +66,14 @@ namespace VenninBeeMod.Content.Projectiles
                 return;
             }
 
+            if (!PayUpkeep(owner))
+            {
+                Projectile.Kill();
+                return;
+            }
+
+            // Pinning the animation is what holds the channel open, but it also stops the item
+            // from cycling its own use, which is why upkeep is charged here instead.
             Projectile.timeLeft = 6;
             owner.itemTime = 2;
             owner.itemAnimation = 2;
@@ -76,6 +92,29 @@ namespace VenninBeeMod.Content.Projectiles
             AnimateFrames();
             UpdateFacing(owner);
             SpillParticles();
+        }
+
+        /// <summary>
+        /// Charges the staff's mana cost once a second and reports whether the caster could
+        /// afford it. Mana is client side, so only the owner runs this.
+        /// </summary>
+        private bool PayUpkeep(Player owner)
+        {
+            if (Main.myPlayer != Projectile.owner)
+            {
+                return true;
+            }
+
+            ManaTimer++;
+            if (ManaTimer < ManaDrainInterval)
+            {
+                return true;
+            }
+
+            ManaTimer = 0f;
+
+            // Passing -1 charges the held item's own cost, with the player's reductions applied.
+            return owner.CheckMana(owner.HeldItem, -1, true, false);
         }
 
         private bool StillChannelling(Player owner)
@@ -126,22 +165,26 @@ namespace VenninBeeMod.Content.Projectiles
             Vector2 aim = (AimPoint(owner) - Projectile.Center).SafeNormalize(new Vector2(owner.direction, 0f));
             Vector2 mouth = Projectile.Center + (aim * 22f);
 
-            // Chaotic cone: angle and speed both jitter, so the stream never looks ruled.
-            Vector2 shot = aim.RotatedByRandom(MathHelper.ToRadians(ConeDegrees))
-                * (StingerSpeed * Main.rand.NextFloat(0.82f, 1.18f));
-
-            int index = Projectile.NewProjectile(
-                Projectile.GetSource_FromThis(),
-                mouth,
-                shot,
-                ModContent.ProjectileType<RiftStinger>(),
-                Projectile.damage,
-                Projectile.knockBack,
-                Projectile.owner);
-
-            if (index >= 0)
+            int volley = Main.rand.Next(MinVolley, MaxVolley + 1);
+            for (int i = 0; i < volley; i++)
             {
-                Main.projectile[index].netUpdate = true;
+                // Chaotic cone: angle and speed both jitter, so the stream never looks ruled.
+                Vector2 shot = aim.RotatedByRandom(MathHelper.ToRadians(ConeDegrees))
+                    * (StingerSpeed * Main.rand.NextFloat(0.82f, 1.18f));
+
+                int index = Projectile.NewProjectile(
+                    Projectile.GetSource_FromThis(),
+                    mouth,
+                    shot,
+                    ModContent.ProjectileType<RiftStinger>(),
+                    Projectile.damage,
+                    Projectile.knockBack,
+                    Projectile.owner);
+
+                if (index >= 0)
+                {
+                    Main.projectile[index].netUpdate = true;
+                }
             }
         }
 
