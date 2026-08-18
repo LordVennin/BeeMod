@@ -1,4 +1,13 @@
 Items: {
+	HornetRift: {
+		DisplayName: Hornet Rift
+		Tooltip:
+			'''
+			Hold to hang a drone ahead of you that tears a rift open
+			It spits stingers at your cursor, faster the longer you hold the channel
+			'''
+	}
+
 	ShadowHiveStaff: {
 		DisplayName: Shadow Hive Staff
 		Tooltip:
@@ -253,6 +262,8 @@ Projectiles: {
 	GhostStinger.DisplayName: Ghost Stinger
 	ShadowHiveSentry.DisplayName: Shadow Hive
 	ShadowHiveBee.DisplayName: Shadow Drone
+	RiftBee.DisplayName: Rift Drone
+	RiftStinger.DisplayName: Rift Stinger
 }
 
 Mods.VenninBeeMod.Tiles.FallingTreeHiveTile.MapEntry: Falling Tree Hive
