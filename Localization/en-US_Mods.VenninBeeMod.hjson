@@ -1,4 +1,13 @@
 Items: {
+	SilentSting: {
+		DisplayName: Silent Sting
+		Tooltip:
+			'''
+			A blur of a dagger that barely slows down between stabs
+			Each hit drops a ninja bee into the target's blind spot to strike from behind
+			'''
+	}
+
 	StrayQueenBee: {
 		DisplayName: Stray Queen Bee
 		Tooltip:
@@ -177,6 +186,11 @@ Items: {
 }
 
 Buffs: {
+	ShadowPoison: {
+		DisplayName: Shadow Poison
+		Description: A shadowed venom is eating away at you
+	}
+
 	BeeSwarmBuff: {
 		DisplayName: Bee Swarm Buff
 		Description: A bee follows you.
@@ -215,6 +229,8 @@ Projectiles: {
 	BuzzKillPellet.DisplayName: Honey Shot
 	BuzzKillBee.DisplayName: Buzz Kill Bee
 	StrayBee.DisplayName: Stray Bee
+	NinjaBee.DisplayName: Ninja Bee
+	SilentStingProjectile.DisplayName: Silent Sting
 }
 
 Mods.VenninBeeMod.Tiles.FallingTreeHiveTile.MapEntry: Falling Tree Hive
