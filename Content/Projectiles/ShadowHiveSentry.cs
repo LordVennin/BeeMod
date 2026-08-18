@@ -14,7 +14,7 @@ namespace VenninBeeMod.Content.Projectiles
     /// </summary>
     public class ShadowHiveSentry : ModProjectile
     {
-        public const float AuraRadius = 190f;
+        public const float AuraRadius = 247f;
 
         private const int PoisonInterval = 30;
         private const int PoisonDuration = 180;
@@ -120,7 +120,8 @@ namespace VenninBeeMod.Content.Projectiles
                 Projectile.damage,
                 Projectile.knockBack,
                 Projectile.owner,
-                ai0: Main.rand.NextFloat(MathHelper.TwoPi));
+                ai0: Main.rand.NextFloat(MathHelper.TwoPi),
+                ai1: Projectile.whoAmI);
 
             if (index >= 0)
             {

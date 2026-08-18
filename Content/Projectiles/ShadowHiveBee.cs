@@ -6,17 +6,23 @@ using Terraria.ModLoader;
 namespace VenninBeeMod.Content.Projectiles
 {
     /// <summary>
-    /// A heavy drone released by the Shadow Hive. It picks the nearest enemy and lumbers toward
-    /// it on a weaving line rather than homing cleanly, and hurts on contact.
+    /// A heavy drone released by the Shadow Hive. It never leaves its hive's ring and will only
+    /// go after enemies standing inside it, weaving toward them rather than homing cleanly.
+    /// Two stings and it is spent.
     /// </summary>
     public class ShadowHiveBee : ModProjectile
     {
+        private const int MaxStings = 2;
+
         private const float DriftSpeed = 3.4f;
         private const float WanderSpeed = 1.8f;
-        private const float SeekRange = 900f;
         private const float WobbleStrength = 2.1f;
 
+        // How far inside the rim the drone starts being pulled back toward the hive.
+        private const float EdgeMargin = 30f;
+
         private ref float Phase => ref Projectile.ai[0];
+        private ref float HiveIndex => ref Projectile.ai[1];
 
         public override void SetStaticDefaults()
         {
@@ -29,7 +35,10 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.height = 26;
             Projectile.friendly = true;
             Projectile.DamageType = DamageClass.Summon;
-            Projectile.penetrate = -1;
+
+            // Spent after two stings.
+            Projectile.penetrate = MaxStings;
+
             Projectile.timeLeft = 900;
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
@@ -42,18 +51,22 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void AI()
         {
-            NPC target = FindTarget();
+            Projectile hive = ResolveHive();
+            if (hive == null)
+            {
+                // The hive it belonged to is gone, so there is no ring left to hold.
+                Projectile.Kill();
+                return;
+            }
 
-            Vector2 heading;
-            if (target != null)
-            {
-                heading = (target.Center - Projectile.Center).SafeNormalize(Vector2.UnitX) * DriftSpeed;
-            }
-            else
-            {
-                // Nothing to chase, so mill about on its own heading.
-                heading = Projectile.velocity.SafeNormalize(Vector2.UnitX) * WanderSpeed;
-            }
+            Vector2 anchor = hive.Center;
+            NPC target = FindTargetInRing(anchor);
+
+            Vector2 heading = target != null
+                ? (target.Center - Projectile.Center).SafeNormalize(Vector2.UnitX) * DriftSpeed
+                : Projectile.velocity.SafeNormalize(Vector2.UnitX) * WanderSpeed;
+
+            heading = ApplyLeash(anchor, heading);
 
             // Weave across the line of travel so the approach reads as a drunken bee.
             Vector2 sideways = new Vector2(-heading.Y, heading.X).SafeNormalize(Vector2.Zero);
@@ -61,6 +74,7 @@ namespace VenninBeeMod.Content.Projectiles
 
             Projectile.velocity = Vector2.Lerp(Projectile.velocity, heading + (sideways * wobble), 0.07f);
 
+            ClampToRing(anchor);
             AnimateFrames();
             UpdateFacing();
 
@@ -72,15 +86,67 @@ namespace VenninBeeMod.Content.Projectiles
             }
         }
 
-        private NPC FindTarget()
+        /// <summary>
+        /// Bends the drone's heading back inward as it nears the rim, ramping up with how far
+        /// out it has drifted so the turn is gradual rather than a bounce.
+        /// </summary>
+        private Vector2 ApplyLeash(Vector2 anchor, Vector2 heading)
+        {
+            float leash = ShadowHiveSentry.AuraRadius - EdgeMargin;
+            float distance = Vector2.Distance(Projectile.Center, anchor);
+            if (distance <= leash)
+            {
+                return heading;
+            }
+
+            float pull = MathHelper.Clamp((distance - leash) / EdgeMargin, 0f, 1f);
+            Vector2 inward = (anchor - Projectile.Center).SafeNormalize(Vector2.UnitX) * DriftSpeed;
+            return Vector2.Lerp(heading, inward, pull);
+        }
+
+        /// <summary>
+        /// Hard backstop, so no amount of wobble or knockback can carry a drone out of the ring.
+        /// </summary>
+        private void ClampToRing(Vector2 anchor)
+        {
+            Vector2 offset = Projectile.Center - anchor;
+            if (offset.Length() > ShadowHiveSentry.AuraRadius)
+            {
+                Projectile.Center = anchor + (offset.SafeNormalize(Vector2.UnitX) * ShadowHiveSentry.AuraRadius);
+            }
+        }
+
+        private Projectile ResolveHive()
+        {
+            int index = (int)HiveIndex;
+            if (index < 0 || index >= Main.maxProjectiles)
+            {
+                return null;
+            }
+
+            Projectile hive = Main.projectile[index];
+            bool valid = hive.active
+                && hive.owner == Projectile.owner
+                && hive.type == ModContent.ProjectileType<ShadowHiveSentry>();
+
+            return valid ? hive : null;
+        }
+
+        private NPC FindTargetInRing(Vector2 anchor)
         {
             NPC closest = null;
-            float closestDistance = SeekRange;
+            float closestDistance = float.MaxValue;
 
             for (int i = 0; i < Main.maxNPCs; i++)
             {
                 NPC npc = Main.npc[i];
                 if (!npc.CanBeChasedBy(this))
+                {
+                    continue;
+                }
+
+                // Anything standing outside the hive's ring is simply not its problem.
+                if (Vector2.Distance(npc.Center, anchor) > ShadowHiveSentry.AuraRadius)
                 {
                     continue;
                 }
@@ -94,6 +160,20 @@ namespace VenninBeeMod.Content.Projectiles
             }
 
             return closest;
+        }
+
+        /// <summary>
+        /// Second guard on the ring, so a drone cannot clip something that has just stepped out.
+        /// </summary>
+        public override bool? CanHitNPC(NPC target)
+        {
+            Projectile hive = ResolveHive();
+            if (hive == null)
+            {
+                return false;
+            }
+
+            return Vector2.Distance(target.Center, hive.Center) <= ShadowHiveSentry.AuraRadius ? null : false;
         }
 
         private void AnimateFrames()
@@ -116,6 +196,16 @@ namespace VenninBeeMod.Content.Projectiles
             else if (Projectile.velocity.X < -0.15f)
             {
                 Projectile.spriteDirection = 1;
+            }
+        }
+
+        public override void OnKill(int timeLeft)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                Dust spent = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height,
+                    DustID.Smoke, 0f, 0f, 140, new Color(160, 110, 220), 0.75f);
+                spent.noGravity = true;
             }
         }
     }
