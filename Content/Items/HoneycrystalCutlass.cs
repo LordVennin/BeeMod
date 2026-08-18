@@ -17,9 +17,11 @@ namespace VenninBeeMod.Content.Items
         {
             Item.damage = 48;
             Item.DamageType = DamageClass.Melee;
-            // Must match the texture (128x128) or the blade detaches from the hand mid-swing.
-            Item.width = 128;
-            Item.height = 128;
+            // Must match the texture. Terraria places a held item from the unscaled
+            // texture frame size, so an oversized sprite drifts off the hand no matter
+            // what Item.scale says; the sprite itself was halved to 64x64 instead.
+            Item.width = 64;
+            Item.height = 64;
             Item.useTime = 30;
             Item.useAnimation = 30;
             Item.useStyle = ItemUseStyleID.Swing;

@@ -18,10 +18,10 @@ namespace VenninBeeMod.Content.Items
         {
             Item.damage = 34;
             Item.DamageType = DamageClass.Ranged;
-            // Must match the texture (113x54) or the held sprite sits wrong in the hand.
-            Item.width = 113;
-            Item.height = 54;
-            Item.scale = 0.7f;
+            // Must match the texture. Item.scale cannot fix hand placement, so the
+            // sprite was resized to 70% (113x54 -> 79x38) rather than scaled at draw time.
+            Item.width = 79;
+            Item.height = 38;
             Item.useTime = 18;
             Item.useAnimation = 18;
             Item.useStyle = ItemUseStyleID.Shoot;
