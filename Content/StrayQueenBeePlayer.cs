@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 using VenninBeeMod.Content.Projectiles;
 
@@ -8,7 +9,13 @@ namespace VenninBeeMod.Content
     public class StrayQueenBeePlayer : ModPlayer
     {
         public const int MaxStrayBees = 15;
-        public const int StrayBeeDamage = 10;
+        public const int BaseBeeDamage = 4;
+
+        /// <summary>
+        /// Quiet bonus for wearing a Hive Pack alongside the accessory. Not mentioned in the
+        /// tooltip on purpose.
+        /// </summary>
+        public const int HivePackBeeDamage = 11;
 
         private const int HatchInterval = 75;
 
@@ -54,7 +61,7 @@ namespace VenninBeeMod.Content
                 spawnPosition,
                 Main.rand.NextVector2Circular(2f, 2f),
                 beeType,
-                StrayBeeDamage,
+                CurrentBeeDamage(Player),
                 0f,
                 Player.whoAmI,
                 ai0: Main.rand.NextFloat(MathHelper.TwoPi));
@@ -63,6 +70,24 @@ namespace VenninBeeMod.Content
             {
                 Main.projectile[index].netUpdate = true;
             }
+        }
+
+        public static int CurrentBeeDamage(Player player)
+        {
+            return HasHivePack(player) ? HivePackBeeDamage : BaseBeeDamage;
+        }
+
+        private static bool HasHivePack(Player player)
+        {
+            for (int i = 3; i < 10; i++)
+            {
+                if (player.armor[i].type == ItemID.HiveBackpack)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

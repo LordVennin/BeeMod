@@ -11,9 +11,7 @@ namespace VenninBeeMod.Content.Projectiles
     /// </summary>
     public class StrayBee : ModProjectile
     {
-        private const float SwarmRadius = 62f;
-        private const float DriftSpeed = 5.4f;
-        private const float LeashRange = 900f;
+        private const float MinimumDistance = 20f;
 
         private ref float Phase => ref Projectile.ai[0];
 
@@ -49,35 +47,74 @@ namespace VenninBeeMod.Content.Projectiles
             // Kept alive by the accessory rather than by a countdown, so unequipping clears them.
             Projectile.timeLeft = 2;
 
-            if (Vector2.Distance(Projectile.Center, owner.Center) > LeashRange)
-            {
-                Projectile.Center = owner.Center;
-                Projectile.netUpdate = true;
-            }
+            // Re-read every tick so putting the Hive Pack on or off retunes bees already in flight.
+            Projectile.damage = StrayQueenBeePlayer.CurrentBeeDamage(owner);
 
-            Drift(owner);
+            SwarmAround(owner);
             AnimateFrames();
             UpdateFacing();
         }
 
         /// <summary>
-        /// Wanders around the owner on a couple of out-of-phase sine terms. Deliberately never
-        /// scans for NPCs, so the swarm will not chase or aggravate anything on its own.
+        /// Parks the bee on a point measured from the player rather than steering it toward one.
+        /// The swarm therefore travels with the player instead of chasing them, and everything
+        /// you see moving is the drift of the offset itself.
+        /// <para/> Deliberately never scans for NPCs, so the swarm will not chase or aggravate
+        /// anything on its own.
         /// </summary>
-        private void Drift(Player owner)
+        private void SwarmAround(Player owner)
         {
-            float time = (Main.GameUpdateCount * 0.024f) + Phase;
+            float seed = Phase;
+            float time = Main.GameUpdateCount * 0.02f;
 
-            Vector2 wanderPoint = owner.Center
-                + new Vector2((float)System.Math.Cos(time * 1.3f), (float)System.Math.Sin(time * 1.7f)) * SwarmRadius
-                + new Vector2((float)System.Math.Sin(time * 2.3f), (float)System.Math.Cos(time * 0.9f)) * 20f;
+            // Each bee draws its own radii, speeds and phases out of its spawn seed, so the
+            // cloud scatters instead of every bee tracing the same shared ellipse.
+            float radiusX = 30f + (Scatter(seed, 1) * 40f);
+            float radiusY = 26f + (Scatter(seed, 2) * 36f);
+            float speedX = 0.6f + (Scatter(seed, 3) * 1.5f);
+            float speedY = 0.6f + (Scatter(seed, 4) * 1.5f);
+            float phaseX = Scatter(seed, 5) * MathHelper.TwoPi;
+            float phaseY = Scatter(seed, 6) * MathHelper.TwoPi;
 
-            Vector2 toPoint = wanderPoint - Projectile.Center;
-            Vector2 desiredVelocity = toPoint.Length() > 10f
-                ? toPoint.SafeNormalize(Vector2.UnitX) * DriftSpeed
-                : toPoint * 0.4f;
+            // Pulls some bees in tight and lets others range wide, filling the cloud out
+            // instead of leaving every bee on the same rim.
+            float spread = 0.55f + (Scatter(seed, 7) * 0.45f);
 
-            Projectile.velocity = Vector2.Lerp(Projectile.velocity, desiredVelocity, 0.11f);
+            Vector2 offset = new Vector2(
+                ((float)System.Math.Sin((time * speedX) + phaseX) * radiusX)
+                    + ((float)System.Math.Sin((time * speedX * 2.7f) + phaseY) * 12f),
+                ((float)System.Math.Cos((time * speedY) + phaseY) * radiusY)
+                    + ((float)System.Math.Cos((time * speedY * 3.1f) + phaseX) * 12f));
+
+            offset *= spread;
+
+            // Keeps the odd bee from parking inside the player sprite when its two wobble
+            // terms happen to cancel out.
+            float distance = offset.Length();
+            if (distance < MinimumDistance)
+            {
+                offset = distance > 0.01f
+                    ? offset * (MinimumDistance / distance)
+                    : new Vector2(MinimumDistance, 0f);
+            }
+
+            offset.Y -= 12f;
+
+            Vector2 swarmPoint = owner.Center + offset;
+
+            // Velocity is applied to position after AI runs, so this lands the bee exactly on
+            // its point this tick while still leaving a sensible facing direction behind.
+            Projectile.velocity = swarmPoint - Projectile.Center;
+        }
+
+        /// <summary>
+        /// Deterministic 0-1 value from the bee's spawn seed. Beats Main.rand here because the
+        /// seed travels with the projectile, so every client shakes out the same flight path.
+        /// </summary>
+        private static float Scatter(float seed, int salt)
+        {
+            double value = System.Math.Sin((seed * (12.9898 + (salt * 7.233))) + (salt * 43.7)) * 43758.5453;
+            return (float)(value - System.Math.Floor(value));
         }
 
         private void AnimateFrames()
