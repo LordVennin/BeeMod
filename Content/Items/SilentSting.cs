@@ -36,7 +36,7 @@ namespace VenninBeeMod.Content.Items
             Item.value = Item.sellPrice(gold: 1);
 
             Item.shoot = ModContent.ProjectileType<SilentStingProjectile>();
-            Item.shootSpeed = 2.4f;
+            Item.shootSpeed = 3.0f;
         }
 
         // noUseGraphic weapons are not treated as melee for prefixes without this.

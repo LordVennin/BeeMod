@@ -21,13 +21,16 @@ namespace VenninBeeMod.Content.Projectiles
 
         private const int SpriteSize = 32;
 
+        // How far past the hitbox the blade actually reaches, in multiples of its velocity.
+        private const float ReachSteps = 9f;
+
         // Reach past the target before the ambusher materialises.
         private const float AmbushGap = 44f;
 
         // Ceiling on the Hive Pack volley, so a dense spawn event cannot flood the screen.
         private const int MaxAmbushTargets = 24;
 
-        public float CollisionWidth => 10f * Projectile.scale;
+        public float CollisionWidth => 14f * Projectile.scale;
 
         public int Timer
         {
@@ -41,14 +44,19 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void SetDefaults()
         {
-            Projectile.Size = new Vector2(18);
+            Projectile.Size = new Vector2(22);
             Projectile.aiStyle = -1;
             Projectile.friendly = true;
             Projectile.penetrate = -1;
             Projectile.tileCollide = false;
             Projectile.scale = 1f;
             Projectile.DamageType = DamageClass.Melee;
-            Projectile.ownerHitCheck = true;
+            // Left off on purpose. Vanilla's version runs its line of sight check against the
+            // target's centre, which on a large boss can sit inside terrain even while the part
+            // you are stabbing is in the open. Colliding does the same check against the
+            // nearest point instead.
+            Projectile.ownerHitCheck = false;
+
             Projectile.extraUpdates = 1;
 
             // Local immunity means the blade keeps its own per-enemy cooldown and never stamps
@@ -115,9 +123,34 @@ namespace VenninBeeMod.Content.Projectiles
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
         {
             Vector2 start = Projectile.Center;
-            Vector2 end = start + (Projectile.velocity * 6f);
+            Vector2 end = start + (Projectile.velocity * ReachSteps);
+
             float collisionPoint = 0f;
-            return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), start, end, CollisionWidth, ref collisionPoint);
+            bool reached = Collision.CheckAABBvLineCollision(
+                targetHitbox.TopLeft(), targetHitbox.Size(), start, end, CollisionWidth, ref collisionPoint);
+
+            if (!reached)
+            {
+                // A hitbox large enough to swallow the whole blade is never crossed by the swept
+                // line, so a point blank stab into a boss could register as a clean miss. Treat
+                // the blade sitting inside the target as a hit.
+                reached = targetHitbox.Contains((int)start.X, (int)start.Y)
+                    || targetHitbox.Contains((int)end.X, (int)end.Y);
+            }
+
+            if (!reached)
+            {
+                return false;
+            }
+
+            // Line of sight to the nearest point of the target rather than its centre, so a
+            // boss whose middle is buried in terrain can still be stabbed where it is exposed.
+            Player player = Main.player[Projectile.owner];
+            Vector2 nearest = new Vector2(
+                MathHelper.Clamp(start.X, targetHitbox.Left, targetHitbox.Right),
+                MathHelper.Clamp(start.Y, targetHitbox.Top, targetHitbox.Bottom));
+
+            return Collision.CanHitLine(player.position, player.width, player.height, nearest, 1, 1);
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
