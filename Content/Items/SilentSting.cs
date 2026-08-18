@@ -20,8 +20,8 @@ namespace VenninBeeMod.Content.Items
             Item.damage = 9;
             Item.knockBack = 1.5f;
             Item.useStyle = ItemUseStyleID.Rapier;
-            Item.useAnimation = 8;
-            Item.useTime = 8;
+            Item.useAnimation = 5;
+            Item.useTime = 5;
             Item.width = 32;
             Item.height = 32;
             Item.UseSound = SoundID.Item1;
@@ -32,8 +32,8 @@ namespace VenninBeeMod.Content.Items
             Item.noUseGraphic = true;
             Item.noMelee = true;
 
-            Item.rare = ItemRarityID.Pink;
-            Item.value = Item.sellPrice(gold: 3);
+            Item.rare = ItemRarityID.Blue;
+            Item.value = Item.sellPrice(gold: 1);
 
             Item.shoot = ModContent.ProjectileType<SilentStingProjectile>();
             Item.shootSpeed = 2.4f;
@@ -47,13 +47,13 @@ namespace VenninBeeMod.Content.Items
 
         public override void AddRecipes()
         {
-            // Deliberately free of Bee Wax and Honeycomb so it does not gate behind Queen Bee.
+            // Shadow Scales only drop from the Eater of Worlds, so they are the gate on their
+            // own. Deliberately free of Bee Wax and Honeycomb so it never waits on Queen Bee.
             CreateRecipe()
-                .AddIngredient(ItemID.HallowedBar, 8)
-                .AddIngredient(ItemID.SoulofNight, 10)
-                .AddIngredient(ItemID.Stinger, 15)
-                .AddIngredient<StickyResin>(20)
-                .AddTile(TileID.MythrilAnvil)
+                .AddIngredient(ItemID.ShadowScale, 20)
+                .AddIngredient(ItemID.DemoniteBar, 10)
+                .AddIngredient<StickyResin>(25)
+                .AddTile(TileID.Anvils)
                 .Register();
         }
     }

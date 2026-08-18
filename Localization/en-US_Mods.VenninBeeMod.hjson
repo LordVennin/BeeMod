@@ -1,4 +1,13 @@
 Items: {
+	PhantomHivebow: {
+		DisplayName: Phantom Hivebow
+		Tooltip:
+			'''
+			Hangs a line of ghost bees over your cursor that rake the ground below
+			Eats five wooden arrows a volley; any other arrow rains from the sky instead
+			'''
+	}
+
 	SilentSting: {
 		DisplayName: Silent Sting
 		Tooltip:
@@ -231,6 +240,8 @@ Projectiles: {
 	StrayBee.DisplayName: Stray Bee
 	NinjaBee.DisplayName: Ninja Bee
 	SilentStingProjectile.DisplayName: Silent Sting
+	GhostBee.DisplayName: Ghost Bee
+	GhostStinger.DisplayName: Ghost Stinger
 }
 
 Mods.VenninBeeMod.Tiles.FallingTreeHiveTile.MapEntry: Falling Tree Hive

@@ -2,6 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Enums;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace VenninBeeMod.Content.Projectiles
@@ -16,7 +17,7 @@ namespace VenninBeeMod.Content.Projectiles
     {
         public const int FadeInDuration = 4;
         public const int FadeOutDuration = 4;
-        public const int TotalDuration = 14;
+        public const int TotalDuration = 10;
 
         private const int SpriteSize = 32;
 
@@ -49,6 +50,12 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.DamageType = DamageClass.Melee;
             Projectile.ownerHitCheck = true;
             Projectile.extraUpdates = 1;
+
+            // Local immunity means the blade keeps its own per-enemy cooldown and never stamps
+            // the shared invincibility window, so stabs land at the weapon's own rate instead
+            // of being throttled by whatever hit the enemy last. -1 is once per enemy per stab.
+            Projectile.usesLocalNPCImmunity = true;
+            Projectile.localNPCHitCooldown = -1;
             Projectile.timeLeft = 360;
             Projectile.hide = true;
         }
@@ -121,6 +128,11 @@ namespace VenninBeeMod.Content.Projectiles
                 return;
             }
 
+            if (!CanBeAmbushed(target))
+            {
+                return;
+            }
+
             BeeSent = 1f;
 
             Player player = Main.player[Projectile.owner];
@@ -136,6 +148,19 @@ namespace VenninBeeMod.Content.Projectiles
             SendAmbusher(player, target);
         }
 
+        /// <summary>
+        /// Target dummies and anything else that cannot actually be hurt are skipped, so the
+        /// swarm cannot be farmed off a practice target.
+        /// </summary>
+        private static bool CanBeAmbushed(NPC npc)
+        {
+            return npc.active
+                && !npc.immortal
+                && !npc.dontTakeDamage
+                && npc.type != NPCID.TargetDummy
+                && npc.life > 0;
+        }
+
         private void AmbushEverythingOnScreen(Player player)
         {
             Rectangle screen = new Rectangle(
@@ -148,7 +173,7 @@ namespace VenninBeeMod.Content.Projectiles
             for (int i = 0; i < Main.maxNPCs && sent < MaxAmbushTargets; i++)
             {
                 NPC npc = Main.npc[i];
-                if (!npc.CanBeChasedBy(this) || !npc.getRect().Intersects(screen))
+                if (!npc.CanBeChasedBy(this) || !CanBeAmbushed(npc) || !npc.getRect().Intersects(screen))
                 {
                     continue;
                 }
