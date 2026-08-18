@@ -94,6 +94,16 @@ namespace VenninBeeMod.Content.Projectiles
             return target.whoAmI == (int)TargetIndex ? null : false;
         }
 
+        /// <summary>
+        /// True damage. ScalingArmorPenetration is a fraction of the target's defense, so 1f
+        /// discards all of it however armoured the enemy is. A flat ArmorPenetration would only
+        /// count for half against NPCs.
+        /// </summary>
+        public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
+        {
+            modifiers.ScalingArmorPenetration += 1f;
+        }
+
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
             target.AddBuff(ModContent.BuffType<ShadowPoison>(), PoisonDuration);

@@ -1,6 +1,5 @@
 using Microsoft.Xna.Framework;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
 using VenninBeeMod.Content.Projectiles;
 
@@ -74,20 +73,7 @@ namespace VenninBeeMod.Content
 
         public static int CurrentBeeDamage(Player player)
         {
-            return HasHivePack(player) ? HivePackBeeDamage : BaseBeeDamage;
-        }
-
-        private static bool HasHivePack(Player player)
-        {
-            for (int i = 3; i < 10; i++)
-            {
-                if (player.armor[i].type == ItemID.HiveBackpack)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return HivePack.IsEquipped(player) ? HivePackBeeDamage : BaseBeeDamage;
         }
     }
 }

@@ -23,6 +23,9 @@ namespace VenninBeeMod.Content.Projectiles
         // Reach past the target before the ambusher materialises.
         private const float AmbushGap = 44f;
 
+        // Ceiling on the Hive Pack volley, so a dense spawn event cannot flood the screen.
+        private const int MaxAmbushTargets = 24;
+
         public float CollisionWidth => 10f * Projectile.scale;
 
         public int Timer
@@ -112,7 +115,7 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
-            // One ambusher per stab, so holding the dagger down does not bury the screen in bees.
+            // One volley per stab, so holding the dagger down does not bury the screen in bees.
             if (Main.myPlayer != Projectile.owner || BeeSent != 0f)
             {
                 return;
@@ -121,6 +124,42 @@ namespace VenninBeeMod.Content.Projectiles
             BeeSent = 1f;
 
             Player player = Main.player[Projectile.owner];
+
+            // Quiet Hive Pack bonus: the whole visible screen gets ambushed, not just the
+            // enemy under the blade. Undocumented in the tooltip on purpose.
+            if (HivePack.IsEquipped(player))
+            {
+                AmbushEverythingOnScreen(player);
+                return;
+            }
+
+            SendAmbusher(player, target);
+        }
+
+        private void AmbushEverythingOnScreen(Player player)
+        {
+            Rectangle screen = new Rectangle(
+                (int)Main.screenPosition.X,
+                (int)Main.screenPosition.Y,
+                Main.screenWidth,
+                Main.screenHeight);
+
+            int sent = 0;
+            for (int i = 0; i < Main.maxNPCs && sent < MaxAmbushTargets; i++)
+            {
+                NPC npc = Main.npc[i];
+                if (!npc.CanBeChasedBy(this) || !npc.getRect().Intersects(screen))
+                {
+                    continue;
+                }
+
+                SendAmbusher(player, npc);
+                sent++;
+            }
+        }
+
+        private void SendAmbusher(Player player, NPC target)
+        {
             Vector2 awayFromPlayer = (target.Center - player.Center).SafeNormalize(Vector2.UnitX);
 
             // Drop the bee on the far side of the target, so it comes back through the blind spot.
