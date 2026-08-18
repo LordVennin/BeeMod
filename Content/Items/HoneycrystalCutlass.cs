@@ -19,9 +19,9 @@ namespace VenninBeeMod.Content.Items
             Item.DamageType = DamageClass.Melee;
             // Must match the texture. Terraria places a held item from the unscaled
             // texture frame size, so an oversized sprite drifts off the hand no matter
-            // what Item.scale says; the sprite itself was halved to 64x64 instead.
-            Item.width = 64;
-            Item.height = 64;
+            // what Item.scale says; the sprite itself is resized instead of scaled.
+            Item.width = 77;
+            Item.height = 77;
             Item.useTime = 30;
             Item.useAnimation = 30;
             Item.useStyle = ItemUseStyleID.Swing;
