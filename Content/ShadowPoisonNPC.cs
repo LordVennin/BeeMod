@@ -32,13 +32,13 @@ namespace VenninBeeMod.Content
                 npc.lifeRegen = 0;
             }
 
-            // lifeRegen is health per tick times 120, so subtracting 2 is exactly 1 health
+            // lifeRegen is health per tick times 120, so subtracting 4 is exactly 2 health
             // per second. The damage parameter is only the number floating over the NPC.
-            npc.lifeRegen -= 2;
+            npc.lifeRegen -= 4;
 
-            if (damage < 1)
+            if (damage < 2)
             {
-                damage = 1;
+                damage = 2;
             }
         }
 

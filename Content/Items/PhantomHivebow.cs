@@ -18,6 +18,7 @@ namespace VenninBeeMod.Content.Items
         private const float HoverHeight = 132f;
 
         private const int FallbackArrowCount = 3;
+        private const int FallbackArrowCost = 3;
         private const float FallbackDrop = 620f;
         private const float FallbackLateral = 420f;
 
@@ -106,7 +107,7 @@ namespace VenninBeeMod.Content.Items
         /// <summary>
         /// Anything other than plain wooden arrows falls back to a plunging volley from off the
         /// top of the screen. The arrows start opposite the way the player faces, so turning
-        /// around flips which shoulder they come over.
+        /// around flips which shoulder they come over. Costs three of whatever is loaded.
         /// </summary>
         private void RainArrows(Player player, EntitySource_ItemUse_WithAmmo source, int type, int damage, float knockback)
         {
@@ -123,6 +124,12 @@ namespace VenninBeeMod.Content.Items
                 Vector2 arrowVelocity = (target - start).SafeNormalize(Vector2.UnitY) * Item.shootSpeed * 1.7f;
 
                 Projectile.NewProjectile(source, start, arrowVelocity, type, damage, knockback, player.whoAmI);
+            }
+
+            // Vanilla already took one for this use, so claim the rest of the cost.
+            for (int i = 0; i < FallbackArrowCost - 1; i++)
+            {
+                player.ConsumeItem(source.AmmoItemIdUsed);
             }
         }
     }

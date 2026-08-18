@@ -1,4 +1,13 @@
 Items: {
+	ShadowHiveStaff: {
+		DisplayName: Shadow Hive Staff
+		Tooltip:
+			'''
+			Hangs a corrupted hive wherever you point it
+			Steeps everything near it in shadow poison and lets drones out to hunt
+			'''
+	}
+
 	PhantomHivebow: {
 		DisplayName: Phantom Hivebow
 		Tooltip:
@@ -242,6 +251,8 @@ Projectiles: {
 	SilentStingProjectile.DisplayName: Silent Sting
 	GhostBee.DisplayName: Ghost Bee
 	GhostStinger.DisplayName: Ghost Stinger
+	ShadowHiveSentry.DisplayName: Shadow Hive
+	ShadowHiveBee.DisplayName: Shadow Drone
 }
 
 Mods.VenninBeeMod.Tiles.FallingTreeHiveTile.MapEntry: Falling Tree Hive
