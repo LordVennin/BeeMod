@@ -23,7 +23,7 @@ Items: {
 		Tooltip:
 			'''
 			Hangs a line of ghost bees over your cursor that rake the ground below
-			Eats five wooden arrows a volley; any other arrow rains from the sky instead
+			Eats five wooden arrows a volley; any other arrow rains from the sky for three
 			'''
 	}
 

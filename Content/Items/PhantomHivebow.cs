@@ -66,17 +66,96 @@ namespace VenninBeeMod.Content.Items
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            if (source.AmmoItemIdUsed == ItemID.WoodenArrow)
+            // Judged on the projectile the ammo produces rather than the ammo's own id, so an
+            // Endless Quiver counts as the wooden arrows it fires instead of being treated as
+            // something exotic and dropped into the fallback volley.
+            bool plainArrow = type == ProjectileID.WoodenArrowFriendly;
+
+            if (plainArrow)
             {
                 SummonGhostLine(player, source, damage, knockback);
+                ConsumeRestOfVolley(player, source, type, ArrowsPerVolley - 1);
             }
             else
             {
                 RainArrows(player, source, type, damage, knockback);
+                ConsumeRestOfVolley(player, source, type, FallbackArrowCost - 1);
             }
 
             // Everything is spawned by hand above, so skip the default single arrow.
             return false;
+        }
+
+        /// <summary>
+        /// Takes the rest of the volley's ammo on top of the one the game already took for this
+        /// use. Mirrors the gate vanilla applies in PickAmmo: nothing is taken from ammo that is
+        /// not consumable, and each arrow still gets its ammo conservation roll. Going around
+        /// that is what was destroying Endless Quivers.
+        /// </summary>
+        private void ConsumeRestOfVolley(Player player, EntitySource_ItemUse_WithAmmo source, int projectileType, int extra)
+        {
+            if (extra <= 0)
+            {
+                return;
+            }
+
+            Item ammo = FindAmmoStack(player, source.AmmoItemIdUsed);
+            if (ammo == null || !ammo.consumable)
+            {
+                return;
+            }
+
+            for (int i = 0; i < extra; i++)
+            {
+                if (ammo.stack <= 0)
+                {
+                    break;
+                }
+
+                if (player.IsAmmoFreeThisShot(Item, ammo, projectileType))
+                {
+                    continue;
+                }
+
+                ammo.stack--;
+                if (ammo.stack <= 0)
+                {
+                    ammo.active = false;
+                    ammo.TurnToAir();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Ammo slots first, then the rest of the inventory, matching the order the game picks
+        /// ammo in so the volley eats from the same stack the first arrow came out of.
+        /// </summary>
+        private static Item FindAmmoStack(Player player, int ammoItemId)
+        {
+            if (ammoItemId <= ItemID.None)
+            {
+                return null;
+            }
+
+            for (int i = 54; i < 58; i++)
+            {
+                Item candidate = player.inventory[i];
+                if (candidate.type == ammoItemId && candidate.stack > 0)
+                {
+                    return candidate;
+                }
+            }
+
+            for (int i = 0; i < 54; i++)
+            {
+                Item candidate = player.inventory[i];
+                if (candidate.type == ammoItemId && candidate.stack > 0)
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -95,12 +174,6 @@ namespace VenninBeeMod.Content.Items
 
                 Projectile.NewProjectile(source, station, Vector2.Zero, beeType,
                     damage, knockback, player.whoAmI, ai0: slot);
-            }
-
-            // Vanilla already took one arrow for this use, so claim the rest of the volley.
-            for (int i = 0; i < ArrowsPerVolley - 1; i++)
-            {
-                player.ConsumeItem(ItemID.WoodenArrow);
             }
         }
 
@@ -124,12 +197,6 @@ namespace VenninBeeMod.Content.Items
                 Vector2 arrowVelocity = (target - start).SafeNormalize(Vector2.UnitY) * Item.shootSpeed * 1.7f;
 
                 Projectile.NewProjectile(source, start, arrowVelocity, type, damage, knockback, player.whoAmI);
-            }
-
-            // Vanilla already took one for this use, so claim the rest of the cost.
-            for (int i = 0; i < FallbackArrowCost - 1; i++)
-            {
-                player.ConsumeItem(source.AmmoItemIdUsed);
             }
         }
     }
