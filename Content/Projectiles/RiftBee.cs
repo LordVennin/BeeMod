@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 using VenninBeeMod.Content.Items;
@@ -16,9 +17,9 @@ namespace VenninBeeMod.Content.Projectiles
     public class RiftBee : ModProjectile
     {
         // Fire interval walks from the slow end to the fast end over ChargeTime.
-        private const float SlowInterval = 28f;
-        private const float FastInterval = 12f;
-        private const float ChargeTime = 150f;
+        private const float SlowInterval = 14f;
+        private const float FastInterval = 4f;
+        private const float ChargeTime = 90f;
 
         // Volleys are 1 to 3 stingers, so the interval is slower than a single shot would want.
         private const int MinVolley = 1;
@@ -29,11 +30,13 @@ namespace VenninBeeMod.Content.Projectiles
 
         private const float HoverDistance = 54f;
         private const float StingerSpeed = 13f;
-        private const float ConeDegrees = 21f;
+        private const float ConeDegrees = 25f;
 
         private ref float Charge => ref Projectile.ai[0];
         private ref float FireTimer => ref Projectile.ai[1];
         private ref float ManaTimer => ref Projectile.ai[2];
+
+        private float VolleyCount;
 
         private Asset<Texture2D> portalTexture;
 
@@ -87,6 +90,13 @@ namespace VenninBeeMod.Content.Projectiles
             {
                 FireTimer = 0f;
                 SpitStinger(owner);
+
+                // Every few volleys only; one buzz per stinger would be unbearable at full rate.
+                VolleyCount++;
+                if (VolleyCount % 3f == 0f)
+                {
+                    SoundEngine.PlaySound(SoundID.Item17 with { Volume = 0.32f, PitchVariance = 0.4f }, Projectile.Center);
+                }
             }
 
             AnimateFrames();
@@ -165,16 +175,21 @@ namespace VenninBeeMod.Content.Projectiles
             Vector2 aim = (AimPoint(owner) - Projectile.Center).SafeNormalize(new Vector2(owner.direction, 0f));
             Vector2 mouth = Projectile.Center + (aim * 22f);
 
+            Vector2 spraySide = new Vector2(-aim.Y, aim.X);
+
             int volley = Main.rand.Next(MinVolley, MaxVolley + 1);
             for (int i = 0; i < volley; i++)
             {
                 // Chaotic cone: angle and speed both jitter, so the stream never looks ruled.
                 Vector2 shot = aim.RotatedByRandom(MathHelper.ToRadians(ConeDegrees))
-                    * (StingerSpeed * Main.rand.NextFloat(0.82f, 1.18f));
+                    * (StingerSpeed * Main.rand.NextFloat(0.78f, 1.24f));
+
+                // Scatter the muzzle across the rift so bursts do not stack on one point.
+                Vector2 origin = mouth + (spraySide * Main.rand.NextFloat(-7f, 7f));
 
                 int index = Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),
-                    mouth,
+                    origin,
                     shot,
                     ModContent.ProjectileType<RiftStinger>(),
                     Projectile.damage,

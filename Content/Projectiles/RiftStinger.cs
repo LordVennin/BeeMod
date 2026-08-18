@@ -26,6 +26,11 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.tileCollide = true;
             Projectile.alpha = 30;
             Projectile.extraUpdates = 1;
+
+            // Each stinger carries its own immunity, otherwise the shared invincibility window
+            // would eat most of a spray and leave stingers hanging in an enemy doing nothing.
+            Projectile.usesLocalNPCImmunity = true;
+            Projectile.localNPCHitCooldown = -1;
         }
 
         public override void AI()
