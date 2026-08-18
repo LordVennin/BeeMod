@@ -2,8 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.Bestiary;
+using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
 using Terraria.ModLoader;
+using VenninBeeMod.Content;
 
 namespace VenninBeeMod.Content.NPCs
 {
@@ -229,13 +231,21 @@ namespace VenninBeeMod.Content.NPCs
             return base.CheckDead();
         }
 
+        public override void ModifyNPCLoot(NPCLoot npcLoot)
+        {
+            npcLoot.Add(ItemDropRule.Common(ModContent.ItemType<Items.StickyResin>(), 1, 28, 44));
+            npcLoot.Add(ItemDropRule.Common(ItemID.SilverCoin, 1, 3, 6));
+
+            // A Swarm Effigy costs 2 sunflowers, so grinding the fight pays for its own summons.
+            npcLoot.Add(ItemDropRule.Common(ItemID.Sunflower, 1, 3, 5));
+
+            npcLoot.Add(ItemDropRule.Common(ModContent.ItemType<Items.StrayQueenBee>()));
+        }
+
         public override void OnKill()
         {
-            int resinAmount = Main.rand.Next(28, 45);
-            Item.NewItem(NPC.GetSource_Loot(), NPC.getRect(), ModContent.ItemType<Items.StickyResin>(), resinAmount);
-
-            int silverAmount = Main.rand.Next(3, 7);
-            Item.NewItem(NPC.GetSource_Loot(), NPC.getRect(), ItemID.SilverCoin, silverAmount);
+            // Records the kill in world data and syncs it, which is what Boss Checklist reads.
+            NPC.SetEventFlagCleared(ref SwarmWorldSystem.downedTheSwarm, -1);
         }
 
         public override bool? DrawHealthBar(byte hbPosition, ref float scale, ref Vector2 position)

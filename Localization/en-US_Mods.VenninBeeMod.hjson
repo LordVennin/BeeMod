@@ -1,4 +1,13 @@
 Items: {
+	StrayQueenBee: {
+		DisplayName: Stray Queen Bee
+		Tooltip:
+			'''
+			A drifting court of bees slowly gathers around you
+			They ignore your enemies, but sting anything that blunders into them
+			'''
+	}
+
 	BuzzKill: {
 		DisplayName: Buzz Kill
 		Tooltip:
@@ -205,6 +214,7 @@ Projectiles: {
 	HoneySlashProjectile.DisplayName: Honey Slash Projectile
 	BuzzKillPellet.DisplayName: Honey Shot
 	BuzzKillBee.DisplayName: Buzz Kill Bee
+	StrayBee.DisplayName: Stray Bee
 }
 
 Mods.VenninBeeMod.Tiles.FallingTreeHiveTile.MapEntry: Falling Tree Hive
