@@ -18,7 +18,7 @@ namespace VenninBeeMod.Content.Projectiles
 
         private const int PoisonInterval = 30;
         private const int PoisonDuration = 180;
-        private const int BeeInterval = 150;
+        private const int BeeInterval = 120;
         private const int MaxBees = 4;
         private const float BobHeight = 7f;
         private const float BobSpeed = 0.045f;
@@ -45,6 +45,16 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void AI()
         {
+            Player owner = Main.player[Projectile.owner];
+
+            // Cancelling the buff is the player's way of packing the hives away. Only the owner
+            // judges this, so buff sync lag cannot make remote clients cull it early.
+            if (Main.myPlayer == Projectile.owner && (!owner.active || owner.dead || !owner.HasBuff<ShadowHiveBuff>()))
+            {
+                Projectile.Kill();
+                return;
+            }
+
             if (HomeX == 0f && HomeY == 0f)
             {
                 HomeX = Projectile.Center.X;
@@ -156,8 +166,37 @@ namespace VenninBeeMod.Content.Projectiles
             }
         }
 
+        /// <summary>
+        /// Two alpha discs sitting on the same spot compound into a blob dark enough to hide
+        /// whatever is standing in it, so stacked hives elect a single one to draw the ring.
+        /// Hives placed meaningfully apart each keep their own.
+        /// </summary>
+        private bool OwnsTheRing()
+        {
+            for (int i = 0; i < Projectile.whoAmI; i++)
+            {
+                Projectile other = Main.projectile[i];
+                if (!other.active || other.type != Projectile.type)
+                {
+                    continue;
+                }
+
+                if (Vector2.Distance(other.Center, Projectile.Center) < AuraRadius * 0.5f)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public override bool PreDraw(ref Color lightColor)
         {
+            if (!OwnsTheRing())
+            {
+                return true;
+            }
+
             auraTexture ??= ModContent.Request<Texture2D>(
                 "VenninBeeMod/Content/Projectiles/ShadowAura", AssetRequestMode.ImmediateLoad);
 

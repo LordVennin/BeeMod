@@ -11,7 +11,7 @@ namespace VenninBeeMod.Content.Buffs
             // DisplayName.SetDefault("Bee Swarm");
             // Description.SetDefault("Summoned bees are protecting you!");
             Main.buffNoSave[Type] = true;
-            Main.buffNoTimeDisplay[Type] = false;
+            Main.buffNoTimeDisplay[Type] = true;
             Main.vanityPet[Type] = false;
             Main.debuff[Type] = false;
         }

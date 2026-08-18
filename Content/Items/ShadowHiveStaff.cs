@@ -4,6 +4,7 @@ using Terraria.DataStructures;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
 using Terraria.ModLoader;
+using VenninBeeMod.Content.Buffs;
 using VenninBeeMod.Content.Projectiles;
 
 namespace VenninBeeMod.Content.Items
@@ -49,6 +50,10 @@ namespace VenninBeeMod.Content.Items
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            // Granted before the hive exists so the sentry's own buff check passes on its first
+            // tick. Cancelling this buff despawns every hive the player has out.
+            player.AddBuff(ModContent.BuffType<ShadowHiveBuff>(), 18000);
+
             // Hangs in the air exactly where the cursor is, rather than dropping to the ground.
             Projectile.NewProjectile(source, Main.MouseWorld, Vector2.Zero, type, damage, knockback, player.whoAmI);
 

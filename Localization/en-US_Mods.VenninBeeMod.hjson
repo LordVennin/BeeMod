@@ -214,6 +214,11 @@ Items: {
 }
 
 Buffs: {
+	ShadowHiveBuff: {
+		DisplayName: Shadow Hive
+		Description: A corrupted hive is holding station for you
+	}
+
 	ShadowPoison: {
 		DisplayName: Shadow Poison
 		Description: A shadowed venom is eating away at you
