@@ -7,6 +7,10 @@ namespace VenninBeeMod.Content.Projectiles
 {
     public class PocketBeeProjectile : ModProjectile
     {
+        private const int HomingDelay = 20;
+        private const float HomingRange = 420f;
+        private const float HomingSpeed = 9f;
+
         private float rotationDirection;
 
         public override void SetStaticDefaults()
@@ -35,6 +39,8 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void AI()
         {
+            SeekWithHivePack();
+
             // Animation
             Projectile.frameCounter++;
             if (Projectile.frameCounter >= 4)
@@ -59,6 +65,46 @@ namespace VenninBeeMod.Content.Projectiles
 
             // Rotate sprite
             Projectile.rotation += rotationDirection * 0.2f;
+        }
+    
+        /// <summary>
+        /// With a Hive Pack the bees stop being dumb shot and turn hunter partway through their
+        /// short flight, curving onto whatever is nearest.
+        /// </summary>
+        private void SeekWithHivePack()
+        {
+            int age = 40 - Projectile.timeLeft;
+            if (age < HomingDelay || !HivePack.IsEquipped(Main.player[Projectile.owner]))
+            {
+                return;
+            }
+
+            NPC closest = null;
+            float closestDistance = HomingRange;
+
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC npc = Main.npc[i];
+                if (!npc.CanBeChasedBy(this))
+                {
+                    continue;
+                }
+
+                float distance = Vector2.Distance(Projectile.Center, npc.Center);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closest = npc;
+                }
+            }
+
+            if (closest == null)
+            {
+                return;
+            }
+
+            Vector2 desired = (closest.Center - Projectile.Center).SafeNormalize(Vector2.UnitX) * HomingSpeed;
+            Projectile.velocity = Vector2.Lerp(Projectile.velocity, desired, 0.16f);
         }
     }
 }

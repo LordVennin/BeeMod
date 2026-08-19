@@ -121,22 +121,12 @@ namespace VenninBeeMod.Content.Projectiles
         {
             Player player = Main.player[Projectile.owner];
 
-            if (HasHivePack(player))
+            if (HivePack.IsEquipped(player))
             {
               target.AddBuff(BuffID.Poisoned, 240); // 4 seconds of Venom
             }
 
             
-        }
-
-        private bool HasHivePack(Player player)
-        {
-            for (int i = 3; i < 10; i++) // accessory slots
-            {
-                if (player.armor[i].type == ItemID.HiveBackpack)
-                    return true;
-            }
-            return false;
         }
 
     }

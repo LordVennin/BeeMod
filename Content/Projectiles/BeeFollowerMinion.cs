@@ -41,7 +41,7 @@ namespace VenninBeeMod.Content.Projectiles
         {
             Player player = Main.player[Projectile.owner];
 
-            if (HasHivePack(Main.player[Projectile.owner]))
+            if (HivePack.IsEquipped(Main.player[Projectile.owner]))
             {
                 Projectile.minionSlots = 0.25f; // Less slot cost with Hive Pack
             }
@@ -167,18 +167,11 @@ namespace VenninBeeMod.Content.Projectiles
         public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
         {
             Player player = Main.player[Projectile.owner];
-            if (HasHivePack(player))
+            if (HivePack.IsEquipped(player))
             {
                 modifiers.FinalDamage *= 1.10f;
             }
         }
 
-        private bool HasHivePack(Player player)
-        {
-            for (int i = 3; i < 10; i++)
-                if (player.armor[i].type == ItemID.HiveBackpack)
-                    return true;
-            return false;
-        }
     }
 }

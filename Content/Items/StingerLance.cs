@@ -73,20 +73,10 @@ namespace VenninBeeMod.Content.Items
 
         public override void ModifyWeaponDamage(Player player, ref StatModifier damage)
         {
-            if (HasHivePack(player))
+            if (HivePack.IsEquipped(player))
             {
                 damage *= 1.15f; // 15% more damage
             }
-        }
-
-        private bool HasHivePack(Player player)
-        {
-            for (int i = 3; i < 10; i++) // accessory slots
-            {
-                if (player.armor[i].type == ItemID.HiveBackpack)
-                    return true;
-            }
-            return false;
         }
 
         public override void AddRecipes()

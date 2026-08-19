@@ -77,7 +77,7 @@ namespace VenninBeeMod.Content.Projectiles
         {
             Projectile.ai[1]++;
             Projectile.tileCollide = Projectile.ai[1] >= 0f;
-            if (HasHivePack(player))
+            if (HivePack.IsEquipped(player))
             {
                 NPC target = FindTarget();
                 if (target != null)
@@ -142,17 +142,5 @@ namespace VenninBeeMod.Content.Projectiles
             return closest;
         }
 
-        private bool HasHivePack(Player player)
-        {
-            for (int i = 3; i < 10; i++)
-            {
-                if (player.armor[i].type == ItemID.HiveBackpack)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
     }
 }

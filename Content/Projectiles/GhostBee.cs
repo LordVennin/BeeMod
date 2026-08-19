@@ -78,8 +78,11 @@ namespace VenninBeeMod.Content.Projectiles
             int stingerType = ModContent.ProjectileType<GhostStinger>();
             float spread = MathHelper.ToRadians(SpreadDegrees);
 
-            // The inverted V: one arm down and left, the other down and right.
-            foreach (float sign in new[] { -1f, 1f })
+            // The inverted V: one arm down and left, the other down and right. A Hive Pack adds
+            // a third straight down the middle, turning the V into a trident.
+            bool trident = HivePack.IsEquipped(Main.player[Projectile.owner]);
+
+            foreach (float sign in trident ? new[] { -1f, 0f, 1f } : new[] { -1f, 1f })
             {
                 Vector2 shot = Vector2.UnitY.RotatedBy(spread * sign) * StingerSpeed;
                 Projectile.NewProjectile(

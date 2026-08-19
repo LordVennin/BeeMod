@@ -50,7 +50,7 @@ namespace VenninBeeMod.Content.Items
 
         public override bool Shoot(Player player, Terraria.DataStructures.EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            float burstChance = HasHivePack(player) ? HivePackBurstChance : BaseBurstChance;
+            float burstChance = HivePack.IsEquipped(player) ? HivePackBurstChance : BaseBurstChance;
             if (Main.rand.NextFloat() < burstChance)
             {
                 int extraShots = Main.rand.Next(2, 4);
@@ -66,21 +66,9 @@ namespace VenninBeeMod.Content.Items
 
         public override bool CanConsumeAmmo(Item ammo, Player player)
         {
-            float consumeChance = HasHivePack(player) ? HivePackConsumeChance : BaseConsumeChance;
+            float consumeChance = HivePack.IsEquipped(player) ? HivePackConsumeChance : BaseConsumeChance;
             return Main.rand.NextFloat() < consumeChance;
         }
 
-        private static bool HasHivePack(Player player)
-        {
-            for (int i = 3; i < 10; i++)
-            {
-                if (player.armor[i].type == ItemID.HiveBackpack)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
     }
 }

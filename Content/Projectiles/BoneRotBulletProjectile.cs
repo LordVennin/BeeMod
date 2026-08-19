@@ -1,12 +1,18 @@
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using VenninBeeMod.Content;
 using VenninBeeMod.Content.Buffs;
 
 namespace VenninBeeMod.Content.Projectiles
 {
     public class BoneRotBulletProjectile : ModProjectile
     {
+        /// <summary>
+        /// Hive Pack secret: the rot sets in deeper, running 6 seconds instead of 4.
+        /// </summary>
+        private const int HivePackDuration = 360;
+
         public override void SetDefaults()
         {
             Projectile.width = 6;
@@ -25,7 +31,8 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
-            target.AddBuff(ModContent.BuffType<BoneRot>(), BoneRot.Duration);
+            int duration = HivePack.IsEquipped(Main.player[Projectile.owner]) ? HivePackDuration : BoneRot.Duration;
+            target.AddBuff(ModContent.BuffType<BoneRot>(), duration);
         }
 
         public override void OnKill(int timeLeft)

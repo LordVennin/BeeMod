@@ -12,6 +12,11 @@ namespace VenninBeeMod.Content.Projectiles
         private const float AirDrag = 0.992f;
         private const float BeeDamageFactor = 0.5f;
 
+        /// <summary>Ticks a Hive Pack keeps the shot flat before gravity takes over.</summary>
+        private const float FlatFlightTicks = 25f;
+
+        private ref float Age => ref Projectile.ai[0];
+
         public override void SetDefaults()
         {
             Projectile.width = 8;
@@ -26,13 +31,23 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void AI()
         {
-            // Heavy dropoff: the shot arcs hard and the spray only reaches so far.
-            Projectile.velocity.X *= AirDrag;
-            Projectile.velocity.Y += Gravity;
+            Age++;
 
-            if (Projectile.velocity.Y > MaxFallSpeed)
+            // Heavy dropoff: the shot arcs hard and the spray only reaches so far. A Hive Pack
+            // suspends that for the first stretch, which is what turns this from a point blank
+            // spitter into something with real reach.
+            bool carried = Age <= FlatFlightTicks && HivePack.IsEquipped(Main.player[Projectile.owner]);
+
+            Projectile.velocity.X *= AirDrag;
+
+            if (!carried)
             {
-                Projectile.velocity.Y = MaxFallSpeed;
+                Projectile.velocity.Y += Gravity;
+
+                if (Projectile.velocity.Y > MaxFallSpeed)
+                {
+                    Projectile.velocity.Y = MaxFallSpeed;
+                }
             }
 
             Lighting.AddLight(Projectile.Center, 0.45f, 0.35f, 0.08f);

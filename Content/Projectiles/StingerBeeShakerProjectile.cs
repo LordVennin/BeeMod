@@ -68,7 +68,7 @@ namespace VenninBeeMod.Content.Projectiles
                 int beeCount = 1;
                 float spawnChance = 0.04f;
 
-                if (HasHivePack(player))
+                if (HivePack.IsEquipped(player))
                 {
                     beeCount = 1;
                     spawnChance = 0.08f;
@@ -92,7 +92,7 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void ModifyDamageHitbox(ref Rectangle hitbox)
         {
-            // Shrink the hitbox inward — tune these numbers to your needs
+            // Shrink the hitbox inward ï¿½ tune these numbers to your needs
             hitbox.Inflate(-20, -32); // width down by 40 total, height by 64 total
         }
 
@@ -125,7 +125,7 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
         {
-            // Define how far from center the spear's tip is — upward direction
+            // Define how far from center the spear's tip is ï¿½ upward direction
             float tipOffset = 50f; // this reaches "up" from the player's hand
 
             // Get the point of the tip of the spear
@@ -135,16 +135,6 @@ namespace VenninBeeMod.Content.Projectiles
             Rectangle tipHitbox = new Rectangle((int)spearTip.X - 8, (int)spearTip.Y - 8, 16, 16);
 
             return tipHitbox.Intersects(targetHitbox);
-        }
-
-        private bool HasHivePack(Player player)
-        {
-            for (int i = 3; i < 10; i++) // accessory slots
-            {
-                if (player.armor[i].type == ItemID.HiveBackpack)
-                    return true;
-            }
-            return false;
         }
 
     }

@@ -98,7 +98,7 @@ namespace VenninBeeMod.Content.Projectiles
                 // Dust logic (with timer)
                 dustTimer++;
                 Player owner = Main.player[Projectile.owner];
-                float range = HasHivePack(owner) ? 90f : 60f;
+                float range = HivePack.IsEquipped(owner) ? 90f : 60f;
 
                 if (dustTimer >= 6)
                 {
@@ -149,7 +149,7 @@ namespace VenninBeeMod.Content.Projectiles
         {
             Player player = Main.player[Projectile.owner];
 
-            if (HasHivePack(player) && Projectile.localAI[0] == 0f)
+            if (HivePack.IsEquipped(player) && Projectile.localAI[0] == 0f)
             {
                 stuckToNPC = target.whoAmI;
                 npcOffset = Projectile.position - target.position; // store relative position
@@ -162,16 +162,6 @@ namespace VenninBeeMod.Content.Projectiles
             {
                 target.AddBuff(BuffID.Slow, 60); // fallback: just slow on hit
             }
-        }
-
-        private bool HasHivePack(Player player)
-        {
-            for (int i = 3; i < 10; i++) // accessory slots
-            {
-                if (player.armor[i].type == ItemID.HiveBackpack)
-                    return true;
-            }
-            return false;
         }
 
         public override void OnKill(int timeLeft)

@@ -34,7 +34,7 @@ namespace VenninBeeMod.Content.Items
 
         public override void OnHitNPC(Player player, NPC target, NPC.HitInfo hit, int damageDone)
         {
-            float beeChance = HasHivePack(player) ? 0.5f : 0.2f;
+            float beeChance = HivePack.IsEquipped(player) ? 0.5f : 0.2f;
 
             if (Main.myPlayer == player.whoAmI && Main.rand.NextFloat() < beeChance)
             {
@@ -49,14 +49,6 @@ namespace VenninBeeMod.Content.Items
                     player.whoAmI
                 );
             }
-        }
-
-        private bool HasHivePack(Player player)
-        {
-            for (int i = 3; i < 10; i++)
-                if (player.armor[i].type == ItemID.HiveBackpack)
-                    return true;
-            return false;
         }
 
         public override void UseStyle(Player player, Rectangle heldItemFrame)

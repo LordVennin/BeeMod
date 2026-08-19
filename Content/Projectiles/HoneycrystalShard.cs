@@ -24,6 +24,19 @@ namespace VenninBeeMod.Content.Projectiles
         private const int ExplodeFlag = 1;
         private const int RotationInitFlag = 0;
 
+        /// <summary>
+        /// Hive Pack secret: instead of shattering on impact the shard hooks into whatever it hit
+        /// and rides along as a barb, cooking off on a much shorter fuse. Same three bees, but
+        /// they hatch inside the target rather than wherever the shard happened to stop.
+        /// </summary>
+        private const int BarbFuse = 45;
+        private const int BarbDustInterval = 4;
+
+        /// <summary>Index of the host NPC plus one, or 0 while the shard is not lodged.</summary>
+        private ref float LodgedHost => ref Projectile.ai[2];
+
+        private Vector2 lodgeOffset;
+
 
         public override bool PreDraw(ref Color lightColor)
         {
@@ -57,6 +70,9 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void OnSpawn(IEntitySource source)
         {
+            LodgedHost = 0f;
+            lodgeOffset = Vector2.Zero;
+
             Vector2 center = Projectile.Center;
             Projectile.Resize(SpriteWidth, SpriteHeight);
             Projectile.Center = center;
@@ -65,6 +81,12 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void AI()
         {
+            if (LodgedHost > 0f)
+            {
+                UpdateLodged();
+                return;
+            }
+
             if (Projectile.localAI[0] == 0f)
             {
                 if (Projectile.ai[RotationInitFlag] == 0f)
@@ -115,7 +137,75 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
+            if (LodgedHost == 0f && CanLodgeIn(target))
+            {
+                LodgeIn(target);
+                return;
+            }
+
             Explode();
+        }
+
+        private bool CanLodgeIn(NPC target)
+        {
+            return target.active
+                && !target.dontTakeDamage
+                && !target.friendly
+                && HivePack.IsEquipped(Main.player[Projectile.owner]);
+        }
+
+        private void LodgeIn(NPC target)
+        {
+            LodgedHost = target.whoAmI + 1;
+            lodgeOffset = Projectile.Center - target.Center;
+
+            // Keep the barb inside the silhouette rather than pinned to the exact contact point,
+            // which on a fast shard can be a hitbox-corner clip well off the sprite.
+            float maxReach = System.Math.Min(target.width, target.height) * 0.35f;
+            if (lodgeOffset.Length() > maxReach)
+            {
+                lodgeOffset = lodgeOffset.SafeNormalize(Vector2.UnitY) * maxReach;
+            }
+
+            Projectile.ai[1] = 0f;
+            Projectile.velocity = Vector2.Zero;
+            Projectile.friendly = false;
+            Projectile.tileCollide = false;
+            Projectile.localAI[0] = 1f;
+            Projectile.timeLeft = BarbFuse + 30;
+            Projectile.netUpdate = true;
+
+            SoundEngine.PlaySound(SoundID.Item10, Projectile.Center);
+        }
+
+        private void UpdateLodged()
+        {
+            int index = (int)LodgedHost - 1;
+            NPC host = index >= 0 && index < Main.maxNPCs ? Main.npc[index] : null;
+
+            // Host gone means the bees have nothing to hatch into, so pop right there.
+            if (host == null || !host.active || host.life <= 0)
+            {
+                Explode();
+                return;
+            }
+
+            Projectile.Center = host.Center + lodgeOffset;
+            Projectile.velocity = Vector2.Zero;
+            Projectile.rotation += 0.08f;
+
+            Projectile.ai[1]++;
+            if (Projectile.ai[1] % BarbDustInterval == 0f)
+            {
+                Dust dust = Dust.NewDustPerfect(Projectile.Center, DustID.Honey);
+                dust.velocity = Main.rand.NextVector2Circular(1.2f, 1.2f);
+                dust.noGravity = true;
+            }
+
+            if (Projectile.ai[1] >= BarbFuse)
+            {
+                Explode();
+            }
         }
 
         public override void OnKill(int timeLeft)

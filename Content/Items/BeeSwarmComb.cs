@@ -36,14 +36,14 @@ namespace VenninBeeMod.Content.Items
             Item.rare = ItemRarityID.Orange;
             Item.UseSound = SoundID.Item44;
             Item.shoot = ModContent.ProjectileType<BeeFollowerMinion>();
-            Item.buffType = ModContent.BuffType<BeeSwarmBuff>(); ; // You’ll replace this with a custom buff if needed
+            Item.buffType = ModContent.BuffType<BeeSwarmBuff>(); ; // Youï¿½ll replace this with a custom buff if needed
             Item.shootSpeed = 0f;
         }
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int beeCount = HasHivePack(player) ? 3 : 2;
-            float hiveMult = HasHivePack(player) ? 1.1f : 1f;
+            int beeCount = HivePack.IsEquipped(player) ? 3 : 2;
+            float hiveMult = HivePack.IsEquipped(player) ? 1.1f : 1f;
 
             player.AddBuff(Item.buffType, 2);
 
@@ -63,15 +63,6 @@ namespace VenninBeeMod.Content.Items
 
             Vector2 offset = new Vector2(player.direction * horizontalOffset, verticalOffset);
             player.itemLocation = player.MountedCenter + offset;
-        }
-
-        private bool HasHivePack(Player player)
-        {
-            for (int i = 3; i < 10; i++)
-                if (player.armor[i].type == ItemID.HiveBackpack)
-                    return true;
-
-            return false;
         }
 
         public override void AddRecipes()

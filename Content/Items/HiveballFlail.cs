@@ -34,19 +34,9 @@ namespace VenninBeeMod.Content.Items
             Item.UseSound = SoundID.Item1;
         }
 
-        private bool HasHivePack(Player player)
-        {
-            for (int i = 3; i < 10; i++)
-                if (player.armor[i].type == ItemID.HiveBackpack)
-                    return true;
-
-            return false;
-        }
-
-
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            if (HasHivePack(player))
+            if (HivePack.IsEquipped(player))
             {
                 Vector2 offsetDir = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(MathHelper.PiOver2); // perpendicular
                 float spacing = 12f; // distance between each hive

@@ -47,18 +47,11 @@ namespace VenninBeeMod.Content.Projectiles
         {
             Player player = Main.player[Projectile.owner];
 
-            if (HasHivePack(player))
+            if (HivePack.IsEquipped(player))
                 target.AddBuff(BuffID.Chilled, 60);
             else
                 target.AddBuff(BuffID.Slow, 60);
         }
 
-        private bool HasHivePack(Player player)
-        {
-            for (int i = 3; i < 10; i++)
-                if (player.armor[i].type == ItemID.HiveBackpack)
-                    return true;
-            return false;
-        }
     }
 }

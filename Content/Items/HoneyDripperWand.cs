@@ -49,7 +49,7 @@ namespace VenninBeeMod.Content.Items
 
             player.itemRotation = rotation;
 
-            // Offset relative to aim direction — keeps the wand aligned
+            // Offset relative to aim direction ï¿½ keeps the wand aligned
             float offsetDistance = -32f; // tweak to tighten or loosen distance from hand
             Vector2 offset = aimDirection.SafeNormalize(Vector2.UnitX) * offsetDistance;
 
@@ -63,20 +63,10 @@ namespace VenninBeeMod.Content.Items
 
         public override void ModifyWeaponDamage(Player player, ref StatModifier damage)
         {
-            if (HasHivePack(player))
+            if (HivePack.IsEquipped(player))
             {
                 damage *= 1.15f;
             }
-        }
-
-        private bool HasHivePack(Player player)
-        {
-            for (int i = 3; i < 10; i++)
-            {
-                if (player.armor[i].type == ItemID.HiveBackpack)
-                    return true;
-            }
-            return false;
         }
 
         public override void AddRecipes()

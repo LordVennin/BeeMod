@@ -60,7 +60,7 @@ namespace VenninBeeMod.Content.Projectiles
 
                 if (Projectile.Hitbox.Intersects(player.Hitbox))
                 {
-                    if (HasHivePack(owner))
+                    if (HivePack.IsEquipped(owner))
                         player.AddBuff(ModContent.BuffType<QueensHoney>(), 60);
                     else
                         player.AddBuff(BuffID.Honey, 120);
@@ -68,16 +68,6 @@ namespace VenninBeeMod.Content.Projectiles
             }
         }
 
-
-        private bool HasHivePack(Player player)
-        {
-            for (int i = 3; i < 10; i++) // accessory slots
-            {
-                if (player.armor[i].type == ItemID.HiveBackpack)
-                    return true;
-            }
-            return false;
-        }
 
         public override bool PreDraw(ref Color lightColor) => false;
     }

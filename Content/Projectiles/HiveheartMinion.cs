@@ -18,6 +18,7 @@ namespace VenninBeeMod.Content.Projectiles
 
         private const float AttackRange = 700f;
         private const float HealRange = 700f;
+        private const int LifestealPerHit = 1;
         private const float HoverCircleRadiusMin = 40f;
         private const float HoverCircleRadiusMax = 80f;
         private const float HoverCircleHeight = 60f;
@@ -252,11 +253,40 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
+            DrainLifeWithHivePack();
+
             if (Projectile.ai[0] != StateHeal)
             {
                 Projectile.ai[1] = System.Math.Max(1, damageDone / 2);
                 Projectile.ai[0] = StateHeal;
             }
+        }
+
+        /// <summary>
+        /// Hive Pack secret: the idol siphons a drop of life straight back to its owner on every
+        /// sting. This is separate from the courier heal it already flies home - that one is a
+        /// lump sum delivered by hand, this is a trickle that lands immediately.
+        /// </summary>
+        private void DrainLifeWithHivePack()
+        {
+            if (Main.myPlayer != Projectile.owner)
+            {
+                return;
+            }
+
+            Player owner = Main.player[Projectile.owner];
+            if (!owner.active || owner.dead || !HivePack.IsEquipped(owner))
+            {
+                return;
+            }
+
+            if (owner.statLife >= owner.statLifeMax2)
+            {
+                return;
+            }
+
+            owner.statLife = System.Math.Min(owner.statLife + LifestealPerHit, owner.statLifeMax2);
+            owner.HealEffect(LifestealPerHit);
         }
 
         public override bool? CanHitNPC(NPC target)
