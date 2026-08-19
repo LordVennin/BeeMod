@@ -17,12 +17,34 @@ namespace VenninBeeMod.Content.NPCs
     public class SkeletonBee : ModNPC
     {
         private const float NoticeRange = 340f;
-        private const float PerchTriggerRange = 420f;
-        private const float LeaveRange = 620f;
+
+        /// <summary>
+        /// Deliberately much wider than <see cref="NoticeRange"/>. Once it has seen you it should
+        /// commit to a surface, and gating the scan at roughly the aggro range meant a wall a
+        /// little further out than the player never got picked at all.
+        /// </summary>
+        private const float PerchTriggerRange = 700f;
+
+        private const float LeaveRange = 900f;
         private const float GiveUpRange = 1400f;
 
-        private const int PerchSearchSteps = 22;
-        private const int ClimbTimeout = 200;
+        /// <summary>
+        /// Surface scan granularity. Fine steps matter: the resting spot is derived from the
+        /// first offset that collides, so a coarse scan parks the bee too far out for
+        /// <see cref="GripDirection"/> to still feel the surface, and it flips between perching
+        /// and peeling off every frame.
+        /// </summary>
+        private const float PerchSearchStep = 4f;
+        private const int PerchSearchSteps = 48;
+
+        /// <summary>How far shy of the surface it parks, and how far it probes to feel one.</summary>
+        private const float SurfaceGap = 2f;
+        private const float GripProbe = 8f;
+
+        /// <summary>Consecutive frames without a surface before it accepts it has come loose.</summary>
+        private const int SlipTolerance = 12;
+
+        private const int ClimbTimeout = 300;
         private const int ShootInterval = 70;
 
         private const float ApproachSpeed = 4.2f;
@@ -46,6 +68,11 @@ namespace VenninBeeMod.Content.NPCs
         private ref float Timer => ref NPC.ai[1];
         private ref float AnchorX => ref NPC.ai[2];
         private ref float AnchorY => ref NPC.ai[3];
+
+        // Local only: both are re-derived from the tiles around it, so every client agrees
+        // without any of it having to go over the wire.
+        private ref float GripSlot => ref NPC.localAI[0];
+        private ref float SlipCounter => ref NPC.localAI[1];
 
         public override void SetStaticDefaults()
         {
@@ -205,7 +232,7 @@ namespace VenninBeeMod.Content.NPCs
             }
 
             // Only look for a surface every so often; the scan is not worth running every tick.
-            if (distance <= PerchTriggerRange && Timer % 15f == 0f && TryFindPerch(out Vector2 anchor))
+            if (distance <= PerchTriggerRange && Timer % 15f == 0f && TryFindPerch(out Vector2 anchor, out _))
             {
                 AnchorX = anchor.X;
                 AnchorY = anchor.Y;
@@ -225,15 +252,21 @@ namespace VenninBeeMod.Content.NPCs
 
             NPC.velocity = Vector2.Lerp(NPC.velocity, toAnchor.SafeNormalize(-Vector2.UnitY) * ClimbSpeed, 0.16f);
 
-            // Grip whatever it reaches first, whether that is the chosen spot or a surface it
-            // brushed on the way.
-            if (toAnchor.Length() < 12f || GripDirection() != Vector2.Zero)
+            // Actually touching something is the only thing that counts as arriving. Perching on
+            // proximity alone was the bug: it would latch a few pixels short, fail the grip test
+            // on the very next frame and drop straight back to approaching, over and over.
+            Vector2 grip = GripDirection();
+            if (grip != Vector2.Zero)
             {
-                State = StatePerch;
-                AnchorX = NPC.Center.X;
-                AnchorY = NPC.Center.Y;
+                Perch(grip);
+                return;
+            }
+
+            // Reached the spot with nothing there any more - the wall was mined out mid-flight.
+            if (toAnchor.Length() < SurfaceGap * 2f)
+            {
+                State = StateApproach;
                 Timer = 0f;
-                NPC.velocity = Vector2.Zero;
                 NPC.netUpdate = true;
                 return;
             }
@@ -246,18 +279,68 @@ namespace VenninBeeMod.Content.NPCs
             }
         }
 
+        private void Perch(Vector2 grip)
+        {
+            SnapToSurface(grip);
+
+            State = StatePerch;
+            AnchorX = NPC.Center.X;
+            AnchorY = NPC.Center.Y;
+            Timer = 0f;
+            SlipCounter = 0f;
+            GripSlot = System.Array.IndexOf(PerchDirections, grip) + 1;
+            NPC.velocity = Vector2.Zero;
+            NPC.rotation = grip.ToRotation() - MathHelper.PiOver2;
+            NPC.netUpdate = true;
+        }
+
+        /// <summary>
+        /// Walks the last couple of pixels into the surface so it sits flush against it rather
+        /// than hanging in the air a hair short of the tiles.
+        /// </summary>
+        private void SnapToSurface(Vector2 grip)
+        {
+            for (int i = 0; i < 12; i++)
+            {
+                Vector2 stepped = NPC.position + grip;
+                if (Collision.SolidCollision(stepped, NPC.width, NPC.height))
+                {
+                    return;
+                }
+
+                NPC.position = stepped;
+            }
+        }
+
         private void PerchAI(Player player)
         {
             Vector2 grip = GripDirection();
 
+            if (grip == Vector2.Zero)
+            {
+                // A single failed probe is almost always the bee sitting a pixel proud of the
+                // tiles, not the wall being gone. Letting go on the first one is what made it
+                // stutter in and out of the air; it takes a run of them now.
+                SlipCounter++;
+                grip = RememberedGrip();
+            }
+            else
+            {
+                SlipCounter = 0f;
+                GripSlot = System.Array.IndexOf(PerchDirections, grip) + 1;
+            }
+
+            bool lostSurface = grip == Vector2.Zero || SlipCounter >= SlipTolerance;
             bool lostPlayer = !player.active || player.dead || Vector2.Distance(NPC.Center, player.Center) > LeaveRange;
 
-            if (grip == Vector2.Zero || lostPlayer)
+            if (lostSurface || lostPlayer)
             {
                 // Peel off and go after them rather than sitting on a wall out of range.
                 State = player.active && !player.dead ? StateApproach : StateWander;
                 NPC.rotation = 0f;
                 Timer = 0f;
+                SlipCounter = 0f;
+                GripSlot = 0f;
                 NPC.netUpdate = true;
                 return;
             }
@@ -298,13 +381,14 @@ namespace VenninBeeMod.Content.NPCs
 
         /// <summary>
         /// Which way the surface it is holding lies, or zero if it is not touching one. Doubles
-        /// as the grip check, so mining the wall out drops it immediately.
+        /// as the grip check, so mining the wall out eventually drops it - see the slip
+        /// tolerance in <see cref="PerchAI"/>.
         /// </summary>
         private Vector2 GripDirection()
         {
             foreach (Vector2 dir in PerchDirections)
             {
-                if (Collision.SolidCollision(NPC.position + (dir * 6f), NPC.width, NPC.height))
+                if (Collision.SolidCollision(NPC.position + (dir * GripProbe), NPC.width, NPC.height))
                 {
                     return dir;
                 }
@@ -314,18 +398,29 @@ namespace VenninBeeMod.Content.NPCs
         }
 
         /// <summary>
+        /// The surface it last had hold of, so a momentary miss keeps the same pose and firing
+        /// line instead of snapping the sprite upright.
+        /// </summary>
+        private Vector2 RememberedGrip()
+        {
+            int index = (int)GripSlot - 1;
+            return index >= 0 && index < PerchDirections.Length ? PerchDirections[index] : Vector2.Zero;
+        }
+
+        /// <summary>
         /// Nearest solid surface overhead or to either side, as a point to fly to.
         /// </summary>
-        private bool TryFindPerch(out Vector2 anchor)
+        private bool TryFindPerch(out Vector2 anchor, out Vector2 grip)
         {
             anchor = Vector2.Zero;
+            grip = Vector2.Zero;
             float best = float.MaxValue;
 
             foreach (Vector2 dir in PerchDirections)
             {
                 for (int step = 1; step <= PerchSearchSteps; step++)
                 {
-                    float reach = step * 8f;
+                    float reach = step * PerchSearchStep;
                     if (!Collision.SolidCollision(NPC.position + (dir * reach), NPC.width, NPC.height))
                     {
                         continue;
@@ -334,7 +429,11 @@ namespace VenninBeeMod.Content.NPCs
                     if (reach < best)
                     {
                         best = reach;
-                        anchor = NPC.Center + (dir * (reach - 8f));
+
+                        // Park a hair shy of the surface, not a whole scan step, so the grip
+                        // probe can still feel it once the bee gets there.
+                        anchor = NPC.Center + (dir * (reach - SurfaceGap));
+                        grip = dir;
                     }
 
                     break;

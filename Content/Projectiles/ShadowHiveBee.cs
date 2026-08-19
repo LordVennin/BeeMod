@@ -60,13 +60,14 @@ namespace VenninBeeMod.Content.Projectiles
             }
 
             Vector2 anchor = hive.Center;
-            NPC target = FindTargetInRing(anchor);
+            float radius = ShadowHiveSentry.RadiusFor(hive);
+            NPC target = FindTargetInRing(anchor, radius);
 
             Vector2 heading = target != null
                 ? (target.Center - Projectile.Center).SafeNormalize(Vector2.UnitX) * DriftSpeed
                 : Projectile.velocity.SafeNormalize(Vector2.UnitX) * WanderSpeed;
 
-            heading = ApplyLeash(anchor, heading);
+            heading = ApplyLeash(anchor, radius, heading);
 
             // Weave across the line of travel so the approach reads as a drunken bee.
             Vector2 sideways = new Vector2(-heading.Y, heading.X).SafeNormalize(Vector2.Zero);
@@ -74,7 +75,7 @@ namespace VenninBeeMod.Content.Projectiles
 
             Projectile.velocity = Vector2.Lerp(Projectile.velocity, heading + (sideways * wobble), 0.07f);
 
-            ClampToRing(anchor);
+            ClampToRing(anchor, radius);
             AnimateFrames();
             UpdateFacing();
 
@@ -90,9 +91,9 @@ namespace VenninBeeMod.Content.Projectiles
         /// Bends the drone's heading back inward as it nears the rim, ramping up with how far
         /// out it has drifted so the turn is gradual rather than a bounce.
         /// </summary>
-        private Vector2 ApplyLeash(Vector2 anchor, Vector2 heading)
+        private Vector2 ApplyLeash(Vector2 anchor, float radius, Vector2 heading)
         {
-            float leash = ShadowHiveSentry.AuraRadius - EdgeMargin;
+            float leash = radius - EdgeMargin;
             float distance = Vector2.Distance(Projectile.Center, anchor);
             if (distance <= leash)
             {
@@ -107,12 +108,12 @@ namespace VenninBeeMod.Content.Projectiles
         /// <summary>
         /// Hard backstop, so no amount of wobble or knockback can carry a drone out of the ring.
         /// </summary>
-        private void ClampToRing(Vector2 anchor)
+        private void ClampToRing(Vector2 anchor, float radius)
         {
             Vector2 offset = Projectile.Center - anchor;
-            if (offset.Length() > ShadowHiveSentry.AuraRadius)
+            if (offset.Length() > radius)
             {
-                Projectile.Center = anchor + (offset.SafeNormalize(Vector2.UnitX) * ShadowHiveSentry.AuraRadius);
+                Projectile.Center = anchor + (offset.SafeNormalize(Vector2.UnitX) * radius);
             }
         }
 
@@ -132,7 +133,7 @@ namespace VenninBeeMod.Content.Projectiles
             return valid ? hive : null;
         }
 
-        private NPC FindTargetInRing(Vector2 anchor)
+        private NPC FindTargetInRing(Vector2 anchor, float radius)
         {
             NPC closest = null;
             float closestDistance = float.MaxValue;
@@ -146,7 +147,7 @@ namespace VenninBeeMod.Content.Projectiles
                 }
 
                 // Anything standing outside the hive's ring is simply not its problem.
-                if (Vector2.Distance(npc.Center, anchor) > ShadowHiveSentry.AuraRadius)
+                if (Vector2.Distance(npc.Center, anchor) > radius)
                 {
                     continue;
                 }
@@ -173,7 +174,7 @@ namespace VenninBeeMod.Content.Projectiles
                 return false;
             }
 
-            return Vector2.Distance(target.Center, hive.Center) <= ShadowHiveSentry.AuraRadius ? null : false;
+            return Vector2.Distance(target.Center, hive.Center) <= ShadowHiveSentry.RadiusFor(hive) ? null : false;
         }
 
         private void AnimateFrames()

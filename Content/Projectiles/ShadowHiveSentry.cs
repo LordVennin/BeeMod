@@ -14,7 +14,13 @@ namespace VenninBeeMod.Content.Projectiles
     /// </summary>
     public class ShadowHiveSentry : ModProjectile
     {
-        public const float AuraRadius = 247f;
+        public const float BaseAuraRadius = 247f;
+
+        /// <summary>
+        /// Hive Pack secret: the ring reaches 30 percent further, so the poison field and the
+        /// patch the drones patrol both grow with it.
+        /// </summary>
+        private const float HivePackAuraScale = 1.3f;
 
         private const int PoisonInterval = 30;
         private const int PoisonDuration = 180;
@@ -22,6 +28,17 @@ namespace VenninBeeMod.Content.Projectiles
         private const int MaxBees = 4;
         private const float BobHeight = 7f;
         private const float BobSpeed = 0.045f;
+
+        /// <summary>
+        /// Ring size for a given hive. Drones read this off their own hive rather than assuming
+        /// the base value, so a hive keeps its reach even if the pack comes off mid-fight.
+        /// </summary>
+        public static float RadiusFor(Projectile hive)
+        {
+            return HivePack.IsEquipped(Main.player[hive.owner]) ? BaseAuraRadius * HivePackAuraScale : BaseAuraRadius;
+        }
+
+        private float AuraRadius => RadiusFor(Projectile);
 
         private ref float HomeX => ref Projectile.ai[0];
         private ref float HomeY => ref Projectile.ai[1];

@@ -10,6 +10,12 @@ namespace VenninBeeMod.Content.Items
 {
     public class HornetRift : ModItem
     {
+        /// <summary>
+        /// Mana per use. The channel is deliberately one whole second per cycle, so this doubles
+        /// as the per-second upkeep and vanilla charges it without the drone having to.
+        /// </summary>
+        private const int BaseManaCost = 17;
+
         public override void SetStaticDefaults()
         {
             CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
@@ -20,11 +26,13 @@ namespace VenninBeeMod.Content.Items
         {
             Item.damage = 9;
             Item.DamageType = DamageClass.Magic;
-            Item.mana = 17;
+            Item.mana = BaseManaCost;
             Item.width = 44;
             Item.height = 44;
-            Item.useTime = 20;
-            Item.useAnimation = 20;
+            // A full second per use cycle. Letting the item run its own animation is what keeps
+            // the staff planted in the hand; faking the animation from the drone left it drifting.
+            Item.useTime = 60;
+            Item.useAnimation = 60;
             Item.useStyle = ItemUseStyleID.Shoot;
             Item.noMelee = true;
             Item.knockBack = 1.5f;
@@ -38,6 +46,15 @@ namespace VenninBeeMod.Content.Items
 
             Item.shoot = ModContent.ProjectileType<RiftBee>();
             Item.shootSpeed = 0f;
+        }
+
+        /// <summary>
+        /// Hive Pack secret: a point off the upkeep. It is charged every second the channel is
+        /// held, so a single point adds up over a long cast.
+        /// </summary>
+        public override void UpdateInventory(Player player)
+        {
+            Item.mana = HivePack.IsEquipped(player) ? BaseManaCost - 1 : BaseManaCost;
         }
 
         public override void AddRecipes()

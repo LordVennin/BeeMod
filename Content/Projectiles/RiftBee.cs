@@ -25,8 +25,13 @@ namespace VenninBeeMod.Content.Projectiles
         private const int MinVolley = 1;
         private const int MaxVolley = 3;
 
-        // The item's mana cost is charged once per second for as long as the channel is held.
-        private const int ManaDrainInterval = 60;
+        /// <summary>
+        /// How long the drone outlives a dropped channel. The item re-triggers itself every use
+        /// cycle and lets go of its animation for a frame in between, so a strict check would
+        /// cull the drone on that frame; this rides over the gap without keeping it alive once
+        /// the caster really has stopped (or run dry).
+        /// </summary>
+        private const int ChannelGrace = 10;
 
         private const float HoverDistance = 54f;
         private const float StingerSpeed = 13f;
@@ -34,7 +39,6 @@ namespace VenninBeeMod.Content.Projectiles
 
         private ref float Charge => ref Projectile.ai[0];
         private ref float FireTimer => ref Projectile.ai[1];
-        private ref float ManaTimer => ref Projectile.ai[2];
 
         private float VolleyCount;
 
@@ -54,7 +58,7 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.friendly = false;
             Projectile.DamageType = DamageClass.Magic;
             Projectile.penetrate = -1;
-            Projectile.timeLeft = 20;
+            Projectile.timeLeft = ChannelGrace;
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
             Projectile.netImportant = true;
@@ -65,21 +69,14 @@ namespace VenninBeeMod.Content.Projectiles
             Player owner = Main.player[Projectile.owner];
             if (!StillChannelling(owner))
             {
-                Projectile.Kill();
+                // Coast rather than dying on the spot; timeLeft is the grace window.
+                Projectile.velocity = Vector2.Zero;
                 return;
             }
 
-            if (!PayUpkeep(owner))
-            {
-                Projectile.Kill();
-                return;
-            }
-
-            // Pinning the animation is what holds the channel open, but it also stops the item
-            // from cycling its own use, which is why upkeep is charged here instead.
-            Projectile.timeLeft = 6;
-            owner.itemTime = 2;
-            owner.itemAnimation = 2;
+            // The item drives its own animation and pays its own mana, so all this has to do is
+            // keep topping the drone up for as long as the channel is genuinely open.
+            Projectile.timeLeft = ChannelGrace;
 
             HoldStation(owner);
 
@@ -102,29 +99,6 @@ namespace VenninBeeMod.Content.Projectiles
             AnimateFrames();
             UpdateFacing(owner);
             SpillParticles();
-        }
-
-        /// <summary>
-        /// Charges the staff's mana cost once a second and reports whether the caster could
-        /// afford it. Mana is client side, so only the owner runs this.
-        /// </summary>
-        private bool PayUpkeep(Player owner)
-        {
-            if (Main.myPlayer != Projectile.owner)
-            {
-                return true;
-            }
-
-            ManaTimer++;
-            if (ManaTimer < ManaDrainInterval)
-            {
-                return true;
-            }
-
-            ManaTimer = 0f;
-
-            // Passing -1 charges the held item's own cost, with the player's reductions applied.
-            return owner.CheckMana(owner.HeldItem, -1, true, false);
         }
 
         private bool StillChannelling(Player owner)
