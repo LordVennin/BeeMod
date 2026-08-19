@@ -10,7 +10,7 @@ namespace VenninBeeMod.Content.Projectiles
         private const float Gravity = 0.34f;
         private const float MaxFallSpeed = 16f;
         private const float AirDrag = 0.992f;
-        private const float BeeDamageFactor = 0.5f;
+        private const float BeeDamageFactor = 0.7f;
 
         public override void SetDefaults()
         {
