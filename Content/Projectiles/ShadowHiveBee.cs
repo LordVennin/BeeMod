@@ -12,7 +12,7 @@ namespace VenninBeeMod.Content.Projectiles
     /// </summary>
     public class ShadowHiveBee : ModProjectile
     {
-        private const int MaxStings = 2;
+        private const int MaxStings = 3;
 
         private const float DriftSpeed = 3.4f;
         private const float WanderSpeed = 1.8f;
@@ -39,7 +39,7 @@ namespace VenninBeeMod.Content.Projectiles
             // Spent after two stings.
             Projectile.penetrate = MaxStings;
 
-            Projectile.timeLeft = 900;
+            Projectile.timeLeft = 990;
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
             Projectile.alpha = 60;
