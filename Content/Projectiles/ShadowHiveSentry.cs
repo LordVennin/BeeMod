@@ -25,7 +25,7 @@ namespace VenninBeeMod.Content.Projectiles
         private const int PoisonInterval = 30;
         private const int PoisonDuration = 180;
         private const int BeeInterval = 120;
-        private const int MaxBees = 4;
+        private const int MaxBees = 6;
         private const float BobHeight = 7f;
         private const float BobSpeed = 0.045f;
 
