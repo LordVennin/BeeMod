@@ -1,4 +1,19 @@
 Items: {
+	BoneRotBullet: {
+		DisplayName: Bone Rot Bullet
+		Tooltip: Rots what it hits, softening its attacks
+	}
+
+	HardenedBeeStinger: {
+		DisplayName: Hardened Bee Stinger
+		Tooltip: Calcified solid; still sharp after all this time
+	}
+
+	TatteredBeeHide: {
+		DisplayName: Tattered Bee Hide
+		Tooltip: Dry, holed and faintly buzzing
+	}
+
 	HornetRift: {
 		DisplayName: Hornet Rift
 		Tooltip:
@@ -214,6 +229,11 @@ Items: {
 }
 
 Buffs: {
+	BoneRot: {
+		DisplayName: Bone Rot
+		Description: Your strikes land 15% softer
+	}
+
 	ShadowHiveBuff: {
 		DisplayName: Shadow Hive
 		Description: A corrupted hive is holding station for you
@@ -270,6 +290,8 @@ Projectiles: {
 	ShadowHiveBee.DisplayName: Shadow Drone
 	RiftBee.DisplayName: Rift Drone
 	RiftStinger.DisplayName: Rift Stinger
+	SkeletonStinger.DisplayName: Bone Stinger
+	BoneRotBulletProjectile.DisplayName: Bone Rot Bullet
 }
 
 Mods.VenninBeeMod.Tiles.FallingTreeHiveTile.MapEntry: Falling Tree Hive
@@ -277,3 +299,4 @@ Tiles.TreeHiveTile.MapEntry: Tree Hive Tile
 NPCs.StickyResinBee.DisplayName: Sticky Resin Bee
 NPCs.TheSwarm.DisplayName: The Swarm
 NPCs.SwarmBeeMinion.DisplayName: Swarm Bee
+NPCs.SkeletonBee.DisplayName: Skeleton Bee
