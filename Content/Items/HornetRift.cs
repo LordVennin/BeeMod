@@ -20,11 +20,11 @@ namespace VenninBeeMod.Content.Items
         {
             Item.damage = 9;
             Item.DamageType = DamageClass.Magic;
-            Item.mana = 14;
+            Item.mana = 17;
             Item.width = 44;
             Item.height = 44;
-            Item.useTime = 25;
-            Item.useAnimation = 25;
+            Item.useTime = 20;
+            Item.useAnimation = 20;
             Item.useStyle = ItemUseStyleID.Shoot;
             Item.noMelee = true;
             Item.knockBack = 1.5f;
