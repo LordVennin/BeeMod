@@ -31,7 +31,7 @@ namespace VenninBeeMod.Content.Projectiles
         /// </summary>
         public static void Implant(Player player, NPC target, int weaponDamage)
         {
-            if (!target.active || target.friendly || target.dontTakeDamage || target.immortal)
+            if (!CombatTarget.IsReal(target))
             {
                 return;
             }

@@ -101,17 +101,47 @@ namespace VenninBeeMod.Content.Projectiles
 
         private void SeekAI(Player owner)
         {
-            NPC target = ChooseTarget(owner);
+            NPC target = KeepOrPickTarget(owner);
             if (target == null)
             {
                 Hover(owner);
                 return;
             }
 
-            Target = target.whoAmI + 1;
-
             Vector2 desired = (target.Center - Projectile.Center).SafeNormalize(Vector2.UnitY) * SeekSpeed;
             Projectile.velocity = ((Projectile.velocity * (SeekInertia - 1f)) + desired) / SeekInertia;
+        }
+
+        /// <summary>
+        /// Holds onto the enemy this drone already called, and only goes looking when that one
+        /// is gone.
+        /// </summary>
+        /// <remarks>
+        /// The stickiness is half of what stops drones piling onto one enemy. A drone that
+        /// re-picked every frame would keep flipping to whatever happened to be nearest, and
+        /// since they all launch from the same place that is the same enemy for all of them.
+        /// Projectiles update in index order, so the first drone writes its claim before the
+        /// next one looks.
+        /// </remarks>
+        private NPC KeepOrPickTarget(Player owner)
+        {
+            NPC commanded = owner.HasMinionAttackTargetNPC ? Main.npc[owner.MinionAttackTargetNPC] : null;
+            if (commanded != null && commanded.CanBeChasedBy(this))
+            {
+                Target = commanded.whoAmI + 1;
+                return commanded;
+            }
+
+            NPC current = ResolveHost();
+            if (current != null && current.CanBeChasedBy(this)
+                && Vector2.Distance(Projectile.Center, current.Center) <= LeashRange)
+            {
+                return current;
+            }
+
+            NPC picked = ChooseTarget();
+            Target = picked != null ? picked.whoAmI + 1 : 0f;
+            return picked;
         }
 
         private void LatchedAI(Player owner)
@@ -180,22 +210,16 @@ namespace VenninBeeMod.Content.Projectiles
         }
 
         /// <summary>
-        /// Nearest enemy, but an enemy nobody else is already on wins over a closer one that is
-        /// taken. That spreading is what keeps a squad of these covering ground.
+        /// Nearest enemy, but an enemy nobody else has called wins over a closer one that is
+        /// already spoken for. Falls back to a taken one when that is all there is, so a single
+        /// enemy still gets the whole squad.
         /// </summary>
-        private NPC ChooseTarget(Player owner)
+        private NPC ChooseTarget()
         {
             NPC free = null;
             NPC taken = null;
             float freeDistance = SeekRange;
             float takenDistance = SeekRange;
-
-            NPC commanded = owner.HasMinionAttackTargetNPC ? Main.npc[owner.MinionAttackTargetNPC] : null;
-            if (commanded != null && commanded.CanBeChasedBy(this)
-                && Vector2.Distance(Projectile.Center, commanded.Center) < LeashRange)
-            {
-                return commanded;
-            }
 
             for (int i = 0; i < Main.maxNPCs; i++)
             {
@@ -224,6 +248,12 @@ namespace VenninBeeMod.Content.Projectiles
             return free ?? taken;
         }
 
+        /// <summary>
+        /// Whether another drone has called this enemy - on the way to it as well as sitting on
+        /// it. Counting only the latched ones was the bug: all the drones launch together and
+        /// none of them is latched yet, so they all picked the same nearest enemy and arrived
+        /// on top of each other.
+        /// </summary>
         private bool IsClaimed(NPC npc)
         {
             for (int i = 0; i < Main.maxProjectiles; i++)
@@ -235,7 +265,7 @@ namespace VenninBeeMod.Content.Projectiles
                     continue;
                 }
 
-                if ((int)other.ai[0] == StateLatched && (int)other.ai[1] - 1 == npc.whoAmI)
+                if ((int)other.ai[1] - 1 == npc.whoAmI)
                 {
                     return true;
                 }
@@ -258,10 +288,23 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
+            // Nothing feeds off a practice target.
+            if (!CombatTarget.IsReal(target))
+            {
+                return;
+            }
+
             CrimsonBee.TryConfuse(target);
             Drain();
 
             if ((int)State == StateLatched)
+            {
+                return;
+            }
+
+            // Clamp onto our own claim, or onto something no other drone has called. Brushing
+            // past somebody else's target on the way to ours should not end the trip.
+            if ((int)Target - 1 != target.whoAmI && IsClaimed(target))
             {
                 return;
             }

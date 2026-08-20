@@ -1,5 +1,7 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -31,6 +33,9 @@ namespace VenninBeeMod.Content.Projectiles
         private const float PulseDamageShare = 0.5f;
         private const float BeeDamageShare = 0.45f;
 
+        /// <summary>Segments in the drawn thread. Enough for the sag to look like a curve.</summary>
+        private const int ThreadSegments = 14;
+
         /// <summary>Index of the host NPC plus one, or 0 while still in flight.</summary>
         private ref float Host => ref Projectile.ai[0];
 
@@ -54,6 +59,12 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.tileCollide = true;
             Projectile.ignoreWater = true;
             Projectile.netImportant = true;
+
+            // One hit per enemy. Penetrate is unlimited so the barb survives biting, and without
+            // this a barb that cannot lodge - in a dummy, say - would grind out a hit every
+            // frame it overlapped.
+            Projectile.usesLocalNPCImmunity = true;
+            Projectile.localNPCHitCooldown = -1;
         }
 
         public override void OnSpawn(IEntitySource source)
@@ -210,7 +221,9 @@ namespace VenninBeeMod.Content.Projectiles
         {
             CrimsonBee.TryConfuse(target);
 
-            if (Host != 0f || !target.active || target.dontTakeDamage)
+            // Never lodges in something that cannot die, or the drain and the bees would be
+            // free off a practice target.
+            if (Host != 0f || !CombatTarget.IsReal(target))
             {
                 return;
             }
@@ -251,6 +264,67 @@ namespace VenninBeeMod.Content.Projectiles
         {
             SoundEngine.PlaySound(SoundID.NPCHit18 with { Volume = 0.5f }, Projectile.Center);
             Projectile.Kill();
+        }
+
+        /// <summary>
+        /// Draws the thread of blood running from a lodged barb back to its owner, which is the
+        /// only readout the player gets that a barb is still feeding them.
+        /// </summary>
+        public override bool PreDraw(ref Color lightColor)
+        {
+            if (Host != 0f)
+            {
+                DrawThread();
+            }
+
+            return true;
+        }
+
+        private void DrawThread()
+        {
+            Player owner = Main.player[Projectile.owner];
+            if (!owner.active || owner.dead)
+            {
+                return;
+            }
+
+            Vector2 start = Projectile.Center;
+            Vector2 end = owner.MountedCenter;
+
+            // Hangs under its own weight rather than running straight, so it reads as a thread
+            // and not a laser.
+            float sag = MathHelper.Clamp(Vector2.Distance(start, end) * 0.2f, 8f, 52f);
+            Vector2 control = ((start + end) * 0.5f) + new Vector2(0f, sag);
+
+            // Swells right after each pulse feeds, then settles, so you can see it working.
+            float sinceFeed = (Lodged % PulseInterval) / PulseInterval;
+            float swell = 1f + ((1f - sinceFeed) * (1f - sinceFeed) * 1.5f);
+
+            Texture2D pixel = TextureAssets.MagicPixel.Value;
+            Rectangle source = new Rectangle(0, 0, 1, 1);
+            Vector2 previous = start;
+
+            for (int i = 1; i <= ThreadSegments; i++)
+            {
+                float t = i / (float)ThreadSegments;
+                Vector2 point = Vector2.Lerp(Vector2.Lerp(start, control, t), Vector2.Lerp(control, end, t), t);
+                Vector2 span = point - previous;
+
+                if (span.LengthSquared() < 0.01f)
+                {
+                    continue;
+                }
+
+                // Thickest at the wound, tapering towards the player.
+                float thickness = MathHelper.Lerp(3.4f, 1.3f, t) * swell;
+                Color tint = Color.Lerp(new Color(168, 22, 32), new Color(112, 14, 24), t) * 0.9f;
+
+                Main.spriteBatch.Draw(pixel, previous - Main.screenPosition, source, tint,
+                    span.ToRotation(), new Vector2(0f, 0.5f),
+                    new Vector2(span.Length(), thickness), SpriteEffects.None, 0f);
+
+                previous = point;
+            }
         }
 
         public override void OnKill(int timeLeft)

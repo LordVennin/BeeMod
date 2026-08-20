@@ -187,11 +187,7 @@ namespace VenninBeeMod.Content.Projectiles
         /// </summary>
         private static bool CanBeAmbushed(NPC npc)
         {
-            return npc.active
-                && !npc.immortal
-                && !npc.dontTakeDamage
-                && npc.type != NPCID.TargetDummy
-                && npc.life > 0;
+            return CombatTarget.IsReal(npc);
         }
 
         private void AmbushEverythingOnScreen(Player player)

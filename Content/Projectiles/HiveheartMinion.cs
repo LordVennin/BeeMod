@@ -349,7 +349,7 @@ namespace VenninBeeMod.Content.Projectiles
                 return false;
             }
 
-            return npc.type != NPCID.TargetDummy;
+            return CombatTarget.IsReal(npc);
         }
 
         private void GetMinionOrder(Player player, out int minionIndex, out int minionCount)

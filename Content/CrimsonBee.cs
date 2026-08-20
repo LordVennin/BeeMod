@@ -23,7 +23,7 @@ namespace VenninBeeMod.Content
 
         public static void TryConfuse(NPC target)
         {
-            if (target.active && Main.rand.NextBool(ConfusionOdds))
+            if (CombatTarget.IsReal(target) && Main.rand.NextBool(ConfusionOdds))
             {
                 // NPC.AddBuff honours immunity tables and syncs itself in multiplayer.
                 target.AddBuff(BuffID.Confused, ConfusionDuration);

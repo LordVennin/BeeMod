@@ -141,7 +141,7 @@ namespace VenninBeeMod.Content.Projectiles
                 return;
             }
 
-            if (Host != 0f || !target.active || target.dontTakeDamage)
+            if (Host != 0f || !CombatTarget.IsReal(target))
             {
                 return;
             }
