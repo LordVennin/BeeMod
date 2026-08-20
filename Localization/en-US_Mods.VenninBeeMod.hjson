@@ -14,6 +14,45 @@ Items: {
 		Tooltip: Dry, holed and faintly buzzing
 	}
 
+	GorehiveMaul: {
+		DisplayName: Gorehive Maul
+		Tooltip:
+			'''
+			A slow, ugly swing that plants a grub in whatever it caves in
+			The grub feeds for a few seconds, then comes out as a knot of bees
+			'''
+	}
+
+	Hemobore: {
+		DisplayName: Hemobore
+		Tooltip:
+			'''
+			Fires barbs that stay in the wound and keep working
+			Each one bleeds the target, feeds a thread of life back to you and sheds bees
+			Three barbs at a time, and they tear loose if you stray too far
+			'''
+	}
+
+	BroodCystStaff: {
+		DisplayName: Brood Cyst Staff
+		Tooltip:
+			'''
+			Lobs a cyst that grafts onto an enemy and swells
+			It ruptures for a burst of gore and a swarm
+			Land more on the same target to make the rupture far worse
+			'''
+	}
+
+	BloodgorgerIdol: {
+		DisplayName: Bloodgorger Idol
+		Tooltip:
+			'''
+			Summons a parasite that clamps onto one enemy and drains it
+			The longer it stays attached the harder it bites
+			Several of them spread out rather than pile onto one target
+			'''
+	}
+
 	HornetRift: {
 		DisplayName: Hornet Rift
 		Tooltip:
@@ -229,6 +268,11 @@ Items: {
 }
 
 Buffs: {
+	BloodgorgerBuff: {
+		DisplayName: Bloodgorger
+		Description: A parasite is feeding on your behalf
+	}
+
 	BoneRot: {
 		DisplayName: Bone Rot
 		Description: Your strikes land 15% softer
@@ -292,6 +336,11 @@ Projectiles: {
 	RiftStinger.DisplayName: Rift Stinger
 	SkeletonStinger.DisplayName: Bone Stinger
 	BoneRotBulletProjectile.DisplayName: Bone Rot Bullet
+	BloodBee.DisplayName: Blood Bee
+	GorehiveGrub.DisplayName: Gorehive Grub
+	HemoboreBarb.DisplayName: Hemobore Barb
+	BroodCyst.DisplayName: Brood Cyst
+	BloodgorgerMinion.DisplayName: Bloodgorger
 }
 
 Mods.VenninBeeMod.Tiles.FallingTreeHiveTile.MapEntry: Falling Tree Hive
