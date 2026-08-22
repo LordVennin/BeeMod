@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Audio;
-using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -74,16 +73,18 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.localNPCHitCooldown = -1;
         }
 
-        public override void OnSpawn(IEntitySource source)
-        {
-            EvictOldestBarb();
-        }
-
         /// <summary>
-        /// Keeps the number of threads down to <see cref="MaxLodged"/>. The one that has been in
-        /// longest goes, which makes firing at a fresh target feel like moving a barb rather than
-        /// losing one at random.
+        /// Keeps the number of barbs actually in an enemy down to <see cref="MaxLodged"/>,
+        /// counted across every enemy rather than per target. The one that has been in longest
+        /// goes, which makes firing at a fresh target feel like moving a barb rather than losing
+        /// one at random.
         /// </summary>
+        /// <remarks>
+        /// Run when a barb lodges, not when it is fired. Counting shots still in the air meant a
+        /// barb that was travelling could displace one already attached, and then miss - and
+        /// leaving them out of the count while evicting on spawn would have let a fifth land and
+        /// stick. Counting at the moment of lodging is what makes the cap exact.
+        /// </remarks>
         private void EvictOldestBarb()
         {
             if (Main.myPlayer != Projectile.owner)
@@ -93,25 +94,26 @@ namespace VenninBeeMod.Content.Projectiles
 
             while (true)
             {
-                int count = 0;
+                int lodged = 0;
                 Projectile oldest = null;
 
                 for (int i = 0; i < Main.maxProjectiles; i++)
                 {
                     Projectile other = Main.projectile[i];
-                    if (!other.active || other.type != Projectile.type || other.owner != Projectile.owner)
+                    if (!other.active || other.type != Projectile.type || other.owner != Projectile.owner
+                        || other.ai[0] == 0f)
                     {
                         continue;
                     }
 
-                    count++;
+                    lodged++;
                     if (other.whoAmI != Projectile.whoAmI && (oldest == null || other.ai[1] > oldest.ai[1]))
                     {
                         oldest = other;
                     }
                 }
 
-                if (count <= MaxLodged || oldest == null)
+                if (lodged <= MaxLodged || oldest == null)
                 {
                     return;
                 }
@@ -258,6 +260,9 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.netUpdate = true;
 
             SoundEngine.PlaySound(SoundID.NPCHit13 with { Volume = 0.6f }, Projectile.Center);
+
+            // Now that this one is in, retire whatever no longer fits.
+            EvictOldestBarb();
         }
 
         /// <summary>
