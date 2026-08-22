@@ -17,15 +17,15 @@ namespace VenninBeeMod.Content.Items
 
         public override void SetDefaults()
         {
-            Item.damage = 36;
+            Item.damage = 32;
             Item.DamageType = DamageClass.Magic;
             Item.mana = ManaPerBee;
             Item.width = 36;
             Item.height = 36;
             // The sprite is 128x128; draw the held/world item at quarter size.
             Item.scale = 0.25f;
-            Item.useTime = 8;
-            Item.useAnimation = 8;
+            Item.useTime = 9;
+            Item.useAnimation = 9;
             Item.useStyle = ItemUseStyleID.Shoot;
             Item.noMelee = true;
             Item.knockBack = 3f;
