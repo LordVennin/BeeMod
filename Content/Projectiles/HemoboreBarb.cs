@@ -16,15 +16,22 @@ namespace VenninBeeMod.Content.Projectiles
     /// </summary>
     public class HemoboreBarb : ModProjectile
     {
-        /// <summary>Only three threads at a time; a fourth shot rips the oldest one out.</summary>
-        private const int MaxLodged = 3;
+        /// <summary>Only four threads at a time; a fifth shot rips the oldest one out.</summary>
+        private const int MaxLodged = 4;
+
+        /// <summary>
+        /// How long a barb stays in before it works itself loose - eight seconds. Without this
+        /// a lodged barb kept refreshing its own timeLeft and fed indefinitely, so the only
+        /// thing that ever ended one was a kill, the tether, or being evicted.
+        /// </summary>
+        private const int LodgedLifetime = 480;
 
         private const int PulseInterval = 45;
 
         /// <summary>Life comes back every other pulse, so one barb is a slow trickle.</summary>
         private const int PulsesPerDrain = 2;
 
-        /// <summary>And a bee every third, so three barbs put out a steady drip of them.</summary>
+        /// <summary>And a bee every third, so a full set puts out a steady drip of them.</summary>
         private const int PulsesPerBee = 3;
 
         /// <summary>How far the thread stretches before the barb tears loose.</summary>
@@ -144,6 +151,12 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.timeLeft = 60;
 
             Lodged++;
+            if (Lodged >= LodgedLifetime)
+            {
+                RipOut();
+                return;
+            }
+
             if (Lodged % PulseInterval == 0f)
             {
                 Pulse(owner, host);

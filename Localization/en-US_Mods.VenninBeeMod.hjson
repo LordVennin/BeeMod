@@ -79,7 +79,7 @@ Items: {
 			'''
 			Fires barbs that stay in the wound and keep working
 			Each one bleeds the target, feeds a thread of life back to you and sheds bees
-			Three barbs at a time, and they tear loose if you stray too far
+			Four barbs at a time; they work loose after eight seconds, or if you stray too far
 			'''
 	}
 
