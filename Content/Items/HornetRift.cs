@@ -24,7 +24,7 @@ namespace VenninBeeMod.Content.Items
 
         public override void SetDefaults()
         {
-            Item.damage = 9;
+            Item.damage = 8;
             Item.DamageType = DamageClass.Magic;
             Item.mana = BaseManaCost;
             Item.width = 44;
