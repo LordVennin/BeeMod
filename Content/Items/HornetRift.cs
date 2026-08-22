@@ -15,7 +15,7 @@ namespace VenninBeeMod.Content.Items
         /// third of what holding the channel actually costs per second. Vanilla charges it as
         /// part of the use, which is also what the drone reads as proof it is still paid for.
         /// </summary>
-        private const int BaseManaCost = 10;
+        private const int BaseManaCost = 11;
 
         public override void SetStaticDefaults()
         {
