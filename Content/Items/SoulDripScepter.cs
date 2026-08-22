@@ -24,8 +24,8 @@ namespace VenninBeeMod.Content.Items
             Item.height = 36;
             // The sprite is 128x128; draw the held/world item at quarter size.
             Item.scale = 0.25f;
-            Item.useTime = 10;
-            Item.useAnimation = 10;
+            Item.useTime = 8;
+            Item.useAnimation = 8;
             Item.useStyle = ItemUseStyleID.Shoot;
             Item.noMelee = true;
             Item.knockBack = 3f;
