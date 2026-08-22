@@ -11,10 +11,10 @@ namespace VenninBeeMod.Content.Items
     public class HornetRift : ModItem
     {
         /// <summary>
-        /// Mana per use. The channel is deliberately one whole second per cycle, so this doubles
-        /// as the per-second upkeep and vanilla charges it without the drone having to.
+        /// Mana per use cycle. Three cycles a second works out to roughly the 18 a second the
+        /// channel was always meant to cost, and vanilla charges it without the drone having to.
         /// </summary>
-        private const int BaseManaCost = 17;
+        private const int BaseManaCost = 6;
 
         public override void SetStaticDefaults()
         {
@@ -29,10 +29,11 @@ namespace VenninBeeMod.Content.Items
             Item.mana = BaseManaCost;
             Item.width = 44;
             Item.height = 44;
-            // A full second per use cycle. Letting the item run its own animation is what keeps
-            // the staff planted in the hand; faking the animation from the drone left it drifting.
-            Item.useTime = 60;
-            Item.useAnimation = 60;
+            // A normal weapon's cycle. A full second per use was an outlier - every staff in
+            // the mod that sits in the hand properly is between 10 and 34 - and a long hold is
+            // the other half of why this one drifted.
+            Item.useTime = 20;
+            Item.useAnimation = 20;
             Item.useStyle = ItemUseStyleID.Shoot;
             Item.noMelee = true;
             Item.knockBack = 1.5f;
@@ -46,6 +47,15 @@ namespace VenninBeeMod.Content.Items
 
             Item.shoot = ModContent.ProjectileType<RiftBee>();
             Item.shootSpeed = 0f;
+        }
+
+        /// <summary>
+        /// Without this the staff hangs off the hand instead of being gripped. Every Shoot style
+        /// item in the mod that looks right defines one; this was the only one that did not.
+        /// </summary>
+        public override Vector2? HoldoutOffset()
+        {
+            return new Vector2(-6f, 0f);
         }
 
         /// <summary>

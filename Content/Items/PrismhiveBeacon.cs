@@ -3,6 +3,7 @@ using Terraria;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
 using Terraria.ModLoader;
+using VenninBeeMod.Content.Buffs;
 using VenninBeeMod.Content.Projectiles;
 
 namespace VenninBeeMod.Content.Items
@@ -48,6 +49,10 @@ namespace VenninBeeMod.Content.Items
 
         public override bool Shoot(Player player, Terraria.DataStructures.EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            // Granted before the hive exists so the sentry's own check passes on its first tick.
+            // Cancelling it is how the player packs every planted hive away.
+            player.AddBuff(ModContent.BuffType<PrismhiveBuff>(), 18000);
+
             // Same placement the mod's other sentries use: it hangs where the cursor is rather
             // than dropping to the floor, and UpdateMaxTurrets right after is what retires the
             // oldest one once you are over the cap.

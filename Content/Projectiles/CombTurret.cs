@@ -17,6 +17,9 @@ namespace VenninBeeMod.Content.Projectiles
 
         private const int Lifetime = 480;
         private const int BeeInterval = 60;
+
+        /// <summary>Two a spit. One comb was too slight to be worth the cast on its own.</summary>
+        private const int BeesPerSpit = 2;
         private const float Range = 420f;
         private const float BeeDamageShare = 0.55f;
         private const float Gravity = 0.32f;
@@ -147,20 +150,28 @@ namespace VenninBeeMod.Content.Projectiles
                 return;
             }
 
-            Vector2 launch = (target.Center - Projectile.Center).SafeNormalize(Vector2.UnitY) * 4f;
-            int index = Projectile.NewProjectile(
-                Projectile.GetSource_FromThis(),
-                Projectile.Center,
-                launch,
-                ModContent.ProjectileType<PrismBee>(),
-                System.Math.Max(1, (int)(Projectile.damage * BeeDamageShare)),
-                Projectile.knockBack,
-                Projectile.owner,
-                ai0: target.whoAmI + 1);
+            Vector2 aim = (target.Center - Projectile.Center).SafeNormalize(Vector2.UnitY);
+            int damage = System.Math.Max(1, (int)(Projectile.damage * BeeDamageShare));
 
-            if (index >= 0)
+            for (int i = 0; i < BeesPerSpit; i++)
             {
-                Main.projectile[index].netUpdate = true;
+                // Fanned slightly so the pair does not fly as one dot.
+                Vector2 launch = aim.RotatedBy(MathHelper.ToRadians(Main.rand.NextFloat(-22f, 22f))) * 4f;
+
+                int index = Projectile.NewProjectile(
+                    Projectile.GetSource_FromThis(),
+                    Projectile.Center,
+                    launch,
+                    ModContent.ProjectileType<PrismBee>(),
+                    damage,
+                    Projectile.knockBack,
+                    Projectile.owner,
+                    ai0: target.whoAmI + 1);
+
+                if (index >= 0)
+                {
+                    Main.projectile[index].netUpdate = true;
+                }
             }
         }
 

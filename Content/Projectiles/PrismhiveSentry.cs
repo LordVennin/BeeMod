@@ -3,6 +3,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using VenninBeeMod.Content.Buffs;
 
 namespace VenninBeeMod.Content.Projectiles
 {
@@ -45,6 +46,16 @@ namespace VenninBeeMod.Content.Projectiles
 
         public override void AI()
         {
+            Player owner = Main.player[Projectile.owner];
+
+            // Only the owner judges this, so buff sync lag cannot cull hives on remote clients.
+            if (Main.myPlayer == Projectile.owner
+                && (!owner.active || owner.dead || !owner.HasBuff<PrismhiveBuff>()))
+            {
+                Projectile.Kill();
+                return;
+            }
+
             if (HomeX == 0f && HomeY == 0f)
             {
                 HomeX = Projectile.Center.X;
@@ -140,9 +151,9 @@ namespace VenninBeeMod.Content.Projectiles
                 return;
             }
 
-            Player owner = Main.player[Projectile.owner];
+            Player beeOwner = Main.player[Projectile.owner];
             int beeType = ModContent.ProjectileType<PrismBee>();
-            if (owner.ownedProjectileCounts[beeType] >= MaxBees)
+            if (beeOwner.ownedProjectileCounts[beeType] >= MaxBees)
             {
                 return;
             }

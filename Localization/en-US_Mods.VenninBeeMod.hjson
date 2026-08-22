@@ -16,7 +16,7 @@ Items: {
 
 	Prismwax: {
 		DisplayName: Prismwax
-		Tooltip: Comb that set into crystal when the Hallow took the hive
+		Tooltip: Honeycomb frozen in hallow crystal
 	}
 
 	FracturedStinger: {
@@ -316,6 +316,11 @@ Items: {
 }
 
 Buffs: {
+	PrismhiveBuff: {
+		DisplayName: Prismhive
+		Description: A crystal hive is holding station for you
+	}
+
 	NectarTag: {
 		DisplayName: Nectar Coated
 		Description: Slowed, and your bees are hitting it harder
