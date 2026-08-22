@@ -1,4 +1,3 @@
-using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
@@ -13,9 +12,6 @@ namespace VenninBeeMod.Content.Items
     /// </summary>
     public class GorehiveMaul : ModItem
     {
-        /// <summary>Which way the swing in progress was aimed, or 0 between swings.</summary>
-        private int swingDirection;
-
         public override void SetStaticDefaults()
         {
             CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
@@ -41,35 +37,33 @@ namespace VenninBeeMod.Content.Items
             Item.autoReuse = true;
             Item.scale = 1.1f;
 
-            // Permits the facing to change during the animation. On its own this makes things
-            // worse - movement then re-faces you every frame - but it stops the game undoing
-            // the facing UseStyle sets below.
-            Item.useTurn = true;
+            // Left at its default of false on purpose: the facing is frozen for the whole
+            // animation, so nothing can flip the swing halfway through. CanUseItem below is
+            // what points it at the cursor before the swing starts.
         }
 
         /// <summary>
-        /// Aims each swing at the cursor and holds it there for the whole animation.
+        /// Points the swing at the cursor, once, just before it starts.
         /// </summary>
         /// <remarks>
-        /// Neither value of <see cref="Item.useTurn"/> gets this right on its own. The swing
-        /// inherits whatever facing movement last set, so walking left pinned every swing to the
-        /// left however far right the cursor was. Committing to the cursor on the first frame
-        /// and enforcing it after is what lets you back away from something and still hit it.
-        /// This runs during ItemCheck, which is after movement has had its say, so it wins.
+        /// The timing is the whole point. Doing this from UseStyle flipped the facing after the
+        /// game had already worked the swing arc out from the old facing, so the arc and the
+        /// mirrored sprite disagreed and you got a second weapon swinging the wrong way. Setting
+        /// it before the animation begins leaves the two in step, and useTurn being false means
+        /// nothing changes it again until the swing is over.
+        ///
+        /// The documentation asks that this hook avoid side effects because the use might not
+        /// happen. Turning to face the cursor is harmless if the swing is called off, and this
+        /// item has no mana or ammo cost that could call it off.
         /// </remarks>
-        public override void UseStyle(Player player, Rectangle heldItemFrame)
+        public override bool CanUseItem(Player player)
         {
-            if (player.whoAmI != Main.myPlayer)
+            if (player.whoAmI == Main.myPlayer)
             {
-                return;
+                player.direction = Main.MouseWorld.X > player.MountedCenter.X ? 1 : -1;
             }
 
-            if (player.itemAnimation >= player.itemAnimationMax - 1 || swingDirection == 0)
-            {
-                swingDirection = Main.MouseWorld.X > player.MountedCenter.X ? 1 : -1;
-            }
-
-            player.direction = swingDirection;
+            return true;
         }
 
         public override void OnHitNPC(Player player, NPC target, NPC.HitInfo hit, int damageDone)
