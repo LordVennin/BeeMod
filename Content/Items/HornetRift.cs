@@ -81,8 +81,25 @@ namespace VenninBeeMod.Content.Items
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            // Mana keeps draining every use cycle, but only ever one drone at a time.
-            if (player.ownedProjectileCounts[type] < 1)
+            // Getting here means this use cycle was affordable and the mana has already been
+            // spent, so this call is the receipt the drone waits on. Without it the drone only
+            // watched the channel flag, which stays true on an empty mana bar, and the staff
+            // kept firing for nothing.
+            bool droneOut = false;
+
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile other = Main.projectile[i];
+                if (other.active && other.type == type && other.owner == player.whoAmI)
+                {
+                    other.ai[2] = 0f;
+                    other.netUpdate = true;
+                    droneOut = true;
+                }
+            }
+
+            // One drone at a time; every cycle after the first just pays for the one that is out.
+            if (!droneOut)
             {
                 Projectile.NewProjectile(source, player.MountedCenter, Vector2.Zero, type, damage, knockback, player.whoAmI);
             }

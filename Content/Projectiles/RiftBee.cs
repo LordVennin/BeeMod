@@ -37,8 +37,21 @@ namespace VenninBeeMod.Content.Projectiles
         private const float StingerSpeed = 13f;
         private const float ConeDegrees = 25f;
 
+        /// <summary>
+        /// Ticks since the staff last paid for this drone, reset by HornetRift.Shoot.
+        /// </summary>
+        /// <remarks>
+        /// The channel flag is not enough on its own to say the drone is being paid for. It
+        /// stays true for as long as the button is held whether or not the caster can afford
+        /// anything, so once mana ran out the drone simply carried on spitting for free. The
+        /// item only reaches its Shoot hook after the mana has actually been spent, so treating
+        /// that as a receipt is what ties the drone's life to being able to afford it.
+        /// </remarks>
+        private const int UpkeepGrace = 26;
+
         private ref float Charge => ref Projectile.ai[0];
         private ref float FireTimer => ref Projectile.ai[1];
+        private ref float SincePaid => ref Projectile.ai[2];
 
         private float VolleyCount;
 
@@ -67,7 +80,17 @@ namespace VenninBeeMod.Content.Projectiles
         public override void AI()
         {
             Player owner = Main.player[Projectile.owner];
-            if (!StillChannelling(owner))
+
+            // Only the caster's own client knows whether the payments are still arriving; every
+            // other client waits for the kill to reach it the usual way.
+            if (Main.myPlayer == Projectile.owner)
+            {
+                SincePaid++;
+            }
+
+            bool unpaid = Main.myPlayer == Projectile.owner && SincePaid > UpkeepGrace;
+
+            if (unpaid || !StillChannelling(owner))
             {
                 // Coast rather than dying on the spot; timeLeft is the grace window.
                 Projectile.velocity = Vector2.Zero;
@@ -75,7 +98,7 @@ namespace VenninBeeMod.Content.Projectiles
             }
 
             // The item drives its own animation and pays its own mana, so all this has to do is
-            // keep topping the drone up for as long as the channel is genuinely open.
+            // keep topping the drone up for as long as the channel is genuinely open and paid.
             Projectile.timeLeft = ChannelGrace;
 
             HoldStation(owner);
