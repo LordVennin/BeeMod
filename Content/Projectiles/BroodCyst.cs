@@ -30,6 +30,7 @@ namespace VenninBeeMod.Content.Projectiles
         private const int RuptureFrames = 6;
 
         private const int RuptureFlag = 0;
+        private const int GroundedFlag = 1;
 
         /// <summary>Index of the host NPC plus one, or 0 while in flight.</summary>
         private ref float Host => ref Projectile.ai[0];
@@ -65,7 +66,9 @@ namespace VenninBeeMod.Content.Projectiles
                 return;
             }
 
-            if (Host == 0f)
+            bool grounded = Projectile.localAI[GroundedFlag] == 1f;
+
+            if (Host == 0f && !grounded)
             {
                 Projectile.velocity.Y += 0.14f;
                 Projectile.rotation += 0.05f;
@@ -73,14 +76,19 @@ namespace VenninBeeMod.Content.Projectiles
                 return;
             }
 
-            NPC host = ResolveHost();
-            if (host == null)
+            NPC host = null;
+            if (!grounded)
             {
-                Rupture();
-                return;
+                host = ResolveHost();
+                if (host == null)
+                {
+                    Rupture();
+                    return;
+                }
+
+                Projectile.Center = host.Center + rideOffset;
             }
 
-            Projectile.Center = host.Center + rideOffset;
             Projectile.velocity = Vector2.Zero;
             Projectile.timeLeft = 60;
 
@@ -90,7 +98,7 @@ namespace VenninBeeMod.Content.Projectiles
             // Swells with the fuse and with how many casts have gone into it.
             float stackBulk = 1f + ((EffectiveStacks() - 1) * 0.35f);
             Projectile.scale = (0.7f + (progress * 0.7f)) * stackBulk;
-            Projectile.rotation = (float)System.Math.Sin(SwellTimer * 0.09f) * 0.12f;
+            Projectile.rotation = grounded ? 0f : (float)System.Math.Sin(SwellTimer * 0.09f) * 0.12f;
 
             if (Main.rand.NextFloat() < 0.08f + (progress * 0.25f))
             {
@@ -157,10 +165,12 @@ namespace VenninBeeMod.Content.Projectiles
                     // A fresh cast buys the swell a little more time to show the growth.
                     existing.ai[2] = System.Math.Max(0f, existing.ai[2] - 40f);
                     existing.netUpdate = true;
-                    SoundEngine.PlaySound(SoundID.NPCHit13 with { Volume = 0.6f, Pitch = 0.3f }, target.Center);
+                    SoundEngine.PlaySound(SoundID.Dig with { Volume = 0.5f, Pitch = 0.5f }, target.Center);
                 }
 
-                Projectile.Kill();
+                // Full already, so this one is simply spent. Letting it fall through to Kill
+                // would have run the rupture and handed out a free brood on contact.
+                Fizzle();
                 return;
             }
 
@@ -205,7 +215,7 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.velocity = Vector2.Zero;
             Projectile.netUpdate = true;
 
-            SoundEngine.PlaySound(SoundID.NPCHit13 with { Volume = 0.6f }, target.Center);
+            SoundEngine.PlaySound(SoundID.Dig with { Volume = 0.55f, Pitch = 0.2f }, target.Center);
         }
 
         /// <summary>
@@ -222,26 +232,66 @@ namespace VenninBeeMod.Content.Projectiles
             return Host == 0f ? null : false;
         }
 
+        /// <summary>
+        /// Grafts to the ground and cooks on the same fuse. Rupturing on impact turned the staff
+        /// into a spam button: you could point it at the floor and have bees instantly.
+        /// </summary>
         public override bool OnTileCollide(Vector2 oldVelocity)
         {
-            if (Host != 0f || Projectile.localAI[RuptureFlag] == 1f)
+            if (Host != 0f || Projectile.localAI[RuptureFlag] == 1f
+                || Projectile.localAI[GroundedFlag] == 1f)
             {
                 return false;
             }
 
-            // A cyst that hits the ground still goes off, just for less.
-            Rupture();
+            Projectile.localAI[GroundedFlag] = 1f;
+            Stacks = 1f;
+            SwellTimer = 0f;
+            Projectile.velocity = Vector2.Zero;
+            Projectile.tileCollide = false;
+            Projectile.friendly = false;
+            Projectile.rotation = 0f;
+            Projectile.netUpdate = true;
+
+            SoundEngine.PlaySound(SoundID.Dig with { Volume = 0.5f, Pitch = 0.4f }, Projectile.Center);
             return false;
         }
 
         /// <summary>
-        /// Last resort for a cyst that expires without ever going off - a flight that hit
-        /// nothing, say. The hitbox cannot be opened from here because the projectile is
-        /// already on its way out, so this is bees and gore only.
+        /// A cyst that expires without ever having grown - a flight that hit nothing - is spent,
+        /// not a brood. Every rupture that should pay out runs from AI while the projectile is
+        /// still alive, so this only has to tidy up.
         /// </summary>
         public override void OnKill(int timeLeft)
         {
-            Rupture();
+            // Effects only. Calling Kill from inside OnKill would be re-entrant.
+            SpendQuietly();
+        }
+
+        /// <summary>
+        /// Spends the cyst on the spot without paying anything out.
+        /// </summary>
+        private void Fizzle()
+        {
+            SpendQuietly();
+            Projectile.Kill();
+        }
+
+        private void SpendQuietly()
+        {
+            if (Projectile.localAI[RuptureFlag] == 1f)
+            {
+                return;
+            }
+
+            Projectile.localAI[RuptureFlag] = 1f;
+
+            for (int i = 0; i < 8; i++)
+            {
+                Dust wet = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height,
+                    DustID.Blood, 0f, 0f, 100, default, 0.9f);
+                wet.velocity = Main.rand.NextVector2Circular(1.5f, 1.5f);
+            }
         }
 
         /// <summary>
@@ -279,7 +329,7 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.ResetLocalNPCHitImmunity();
             Projectile.netUpdate = true;
 
-            SoundEngine.PlaySound(SoundID.NPCDeath13 with { Volume = 0.85f }, center);
+            SoundEngine.PlaySound(SoundID.Item14 with { Volume = 0.6f, Pitch = 0.3f }, center);
             SpawnBees(center, stacks, baseDamage);
             SprayGore(center, radius);
         }

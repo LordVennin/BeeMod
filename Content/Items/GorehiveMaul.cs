@@ -36,6 +36,10 @@ namespace VenninBeeMod.Content.Items
             Item.UseSound = SoundID.Item1;
             Item.autoReuse = true;
             Item.scale = 1.1f;
+
+            // Lets the player turn mid swing. Without it a heavy 35 tick animation pins you
+            // facing the way you started, so you cannot back away while swinging.
+            Item.useTurn = true;
         }
 
         public override void OnHitNPC(Player player, NPC target, NPC.HitInfo hit, int damageDone)

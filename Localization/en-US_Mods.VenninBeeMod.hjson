@@ -39,7 +39,8 @@ Items: {
 		Tooltip:
 			'''
 			Plants a crystal hive wherever you point it
-			Its shards refract into three on the way out, and it lets a bee go now and then
+			Its shards hit hardest whole, then refract into three further out
+			It lets a bee go now and then
 			'''
 	}
 
@@ -67,7 +68,8 @@ Items: {
 		Tooltip:
 			'''
 			A slow, ugly swing that plants a grub in whatever it caves in
-			The grub feeds for a few seconds, then comes out as a knot of bees
+			The grub chews while it is in there, and keeps growing if you keep hitting
+			It comes out as a knot of bees, or the moment its host dies
 			'''
 	}
 
@@ -85,8 +87,8 @@ Items: {
 		DisplayName: Brood Cyst Staff
 		Tooltip:
 			'''
-			Lobs a cyst that grafts onto an enemy and swells
-			It ruptures for a burst of gore and a swarm
+			Lobs a cyst that grafts onto an enemy, or onto the ground, and swells
+			Nothing hatches until it has finished swelling
 			Land more on the same target to make the rupture far worse
 			'''
 	}

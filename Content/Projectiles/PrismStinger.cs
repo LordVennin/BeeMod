@@ -15,6 +15,12 @@ namespace VenninBeeMod.Content.Projectiles
         /// <summary>How far it flies before splitting, in ticks.</summary>
         private const int RefractDelay = 14;
 
+        /// <summary>
+        /// What the whole shard is worth before it comes apart. Standing close enough to land it
+        /// intact is the beacon's only real burst, so it is worth notably more than a fragment.
+        /// </summary>
+        private const float IntactBonus = 1.8f;
+
         private const int Fragments = 3;
         private const float FragmentSpread = 17f;
 
@@ -33,6 +39,14 @@ namespace VenninBeeMod.Content.Projectiles
             Projectile.timeLeft = 180;
             Projectile.tileCollide = true;
             Projectile.ignoreWater = true;
+        }
+
+        public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
+        {
+            if (IsFragment == 0f)
+            {
+                modifiers.SourceDamage *= IntactBonus;
+            }
         }
 
         public override void AI()
