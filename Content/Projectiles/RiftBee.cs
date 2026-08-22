@@ -24,7 +24,7 @@ namespace VenninBeeMod.Content.Projectiles
         /// Ticks of held channel to reach the fast end. Doubled from 90, so winding the staff up
         /// is three seconds of commitment rather than a second and a half.
         /// </summary>
-        private const float ChargeTime = 180f;
+        private const float ChargeTime = 210f;
 
         // Volleys are 1 to 3 stingers, so the interval is slower than a single shot would want.
         private const int MinVolley = 1;
