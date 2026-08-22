@@ -6,7 +6,7 @@ using System;
 
 namespace VenninBeeMod.Content.Projectiles
 {
-    public class RoyalBeeOrbiter : ModProjectile
+    public class RoyalBeeOrbiter : ModProjectile, IBeeProjectile
     {
         public override void SetStaticDefaults()
         {

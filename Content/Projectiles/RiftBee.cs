@@ -14,7 +14,7 @@ namespace VenninBeeMod.Content.Projectiles
     /// open in front of itself and spits stingers through it at the cursor. The longer the
     /// channel is held the faster it fires, so letting go throws the wind-up away.
     /// </summary>
-    public class RiftBee : ModProjectile
+    public class RiftBee : ModProjectile, IBeeProjectile
     {
         // Fire interval walks from the slow end to the fast end over ChargeTime.
         private const float SlowInterval = 14f;

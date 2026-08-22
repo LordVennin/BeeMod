@@ -11,7 +11,17 @@ Items: {
 
 	TatteredBeeHide: {
 		DisplayName: Tattered Bee Hide
-		Tooltip: Dry, holed and faintly buzzing
+		Tooltip: Dry, holed and faintly buzzing. Still carries the rot
+	}
+
+	RotweaveShroud: {
+		DisplayName: Rotweave Shroud
+		Tooltip:
+			'''
+			Hide stripped from a skeleton bee and stitched back over its own bones
+			Your bees leave Bone Rot in everything they sting
+			Enemies pay you less attention
+			'''
 	}
 
 	GorehiveMaul: {

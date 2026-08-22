@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace VenninBeeMod.Content.Projectiles
 {
-    public class BuzzKillBee : ModProjectile
+    public class BuzzKillBee : ModProjectile, IBeeProjectile
     {
         private const float ChaseSpeed = 11f;
         private const float ChaseInertia = 9f;

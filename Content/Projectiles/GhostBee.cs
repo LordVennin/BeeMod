@@ -9,7 +9,7 @@ namespace VenninBeeMod.Content.Projectiles
     /// One bee of the Phantom Hivebow's firing line. It is a platform, not a weapon: it holds
     /// station above the cursor, spits two stingers down in a wide inverted V, then fades.
     /// </summary>
-    public class GhostBee : ModProjectile
+    public class GhostBee : ModProjectile, IBeeProjectile
     {
         public const int Lifetime = 34;
 

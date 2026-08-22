@@ -5,7 +5,7 @@ using Terraria.ID;
 
 namespace VenninBeeMod.Content.Projectiles
 {
-    public class HealingBee : ModProjectile
+    public class HealingBee : ModProjectile, IBeeProjectile
     {
         public override void SetStaticDefaults()
         {
@@ -57,7 +57,7 @@ namespace VenninBeeMod.Content.Projectiles
             if (Projectile.velocity.Y != oldVelocity.Y)
                 Projectile.velocity.Y = -oldVelocity.Y * 0.75f;
 
-            return false; // Don’t kill the projectile
+            return false; // Donï¿½t kill the projectile
         }
     }
 }

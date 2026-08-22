@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace VenninBeeMod.Content.Projectiles
 {
-    public class SwarmResinBeeProjectile : ModProjectile
+    public class SwarmResinBeeProjectile : ModProjectile, IBeeProjectile
     {
         public override string Texture => "VenninBeeMod/Content/NPCs/StickyResinBee";
 

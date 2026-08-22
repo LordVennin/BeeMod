@@ -7,7 +7,7 @@ using VenninBeeMod.Content.Buffs;
 
 namespace VenninBeeMod.Content.Projectiles
 {
-    public class BeeFollowerMinion : ModProjectile
+    public class BeeFollowerMinion : ModProjectile, IBeeProjectile
     {
         const int STATE_IDLE = 0;
         const int STATE_ATTACK = 1;

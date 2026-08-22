@@ -10,7 +10,7 @@ namespace VenninBeeMod.Content.Projectiles
     /// go after enemies standing inside it, weaving toward them rather than homing cleanly.
     /// Two stings and it is spent.
     /// </summary>
-    public class ShadowHiveBee : ModProjectile
+    public class ShadowHiveBee : ModProjectile, IBeeProjectile
     {
         private const int MaxStings = 3;
 

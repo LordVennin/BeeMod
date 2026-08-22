@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace VenninBeeMod.Content.Projectiles
 {
-    public class QueenMurmurBee : ModProjectile
+    public class QueenMurmurBee : ModProjectile, IBeeProjectile
     {
         private const float HomingRange = 600f;
         private const float HomingSpeed = 12f;

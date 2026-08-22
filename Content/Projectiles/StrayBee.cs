@@ -9,7 +9,7 @@ namespace VenninBeeMod.Content.Projectiles
     /// A loose bee from the Stray Queen Bee accessory. It never looks for a target, it just
     /// mills around its owner; anything that walks into it gets stung once and the bee is gone.
     /// </summary>
-    public class StrayBee : ModProjectile
+    public class StrayBee : ModProjectile, IBeeProjectile
     {
         private const float MinimumDistance = 20f;
 

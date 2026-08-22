@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace VenninBeeMod.Content.Projectiles
 {
-    public class PocketBeeProjectile : ModProjectile
+    public class PocketBeeProjectile : ModProjectile, IBeeProjectile
     {
         private const int HomingDelay = 20;
         private const float HomingRange = 420f;

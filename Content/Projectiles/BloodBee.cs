@@ -15,7 +15,7 @@ namespace VenninBeeMod.Content.Projectiles
     /// class, and the damage handed to a bee has already been scaled by whichever weapon made
     /// it, so scaling it a second time by the bee's own class would double-dip.
     /// </remarks>
-    public class BloodBee : ModProjectile
+    public class BloodBee : ModProjectile, IBeeProjectile
     {
         private const float ChaseSpeed = 10f;
         private const float ChaseInertia = 8f;

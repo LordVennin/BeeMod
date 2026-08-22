@@ -11,7 +11,7 @@ namespace VenninBeeMod.Content.Projectiles
     /// drives straight through the enemy it was aimed at. If that enemy dies first the bee has
     /// nothing to stab and simply vanishes in a puff of smoke.
     /// </summary>
-    public class NinjaBee : ModProjectile
+    public class NinjaBee : ModProjectile, IBeeProjectile
     {
         private const int WindUp = 12;
         private const float StrikeSpeed = 18f;

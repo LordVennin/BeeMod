@@ -7,7 +7,7 @@ using Terraria.Audio;
 
 namespace VenninBeeMod.Content.Projectiles
 {
-    public class HiveHornetMinion : ModProjectile
+    public class HiveHornetMinion : ModProjectile, IBeeProjectile
     {
         private int lastItemUseTime = -1;
         private bool hasFiredThisUse = false;

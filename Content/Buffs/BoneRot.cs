@@ -13,6 +13,12 @@ namespace VenninBeeMod.Content.Buffs
         public const float AttackPenalty = 0.15f;
         public const int Duration = 240;
 
+        /// <summary>
+        /// What a single bee sting is worth. Much shorter than a bullet's, because the Rotweave
+        /// Shroud lands dozens of these a fight rather than one at a time.
+        /// </summary>
+        public const int BeeDuration = 120;
+
         public override void SetStaticDefaults()
         {
             Main.debuff[Type] = true;

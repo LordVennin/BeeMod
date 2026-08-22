@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace VenninBeeMod.Content.Projectiles
 {
-    public class BeeTrail : ModProjectile
+    public class BeeTrail : ModProjectile, IBeeProjectile
     {
         public override void SetStaticDefaults()
         {

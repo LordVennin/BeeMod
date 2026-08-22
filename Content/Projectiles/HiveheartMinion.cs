@@ -9,7 +9,7 @@ using VenninBeeMod.Content.Buffs;
 
 namespace VenninBeeMod.Content.Projectiles
 {
-    public class HiveheartMinion : ModProjectile
+    public class HiveheartMinion : ModProjectile, IBeeProjectile
     {
         private const int StateIdle = 0;
         private const int StateAttack = 1;

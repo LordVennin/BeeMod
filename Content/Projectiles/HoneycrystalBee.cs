@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace VenninBeeMod.Content.Projectiles
 {
-    public class HoneycrystalBee : ModProjectile
+    public class HoneycrystalBee : ModProjectile, IBeeProjectile
     {
         private const int DustInterval = 6;
         private const int DustCount = 2;

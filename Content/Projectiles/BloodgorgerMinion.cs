@@ -17,7 +17,7 @@ namespace VenninBeeMod.Content.Projectiles
     /// drones never means more healing. And drones prefer an enemy nobody else is on, so a
     /// squad spreads across a room instead of stacking on one target.
     /// </remarks>
-    public class BloodgorgerMinion : ModProjectile
+    public class BloodgorgerMinion : ModProjectile, IBeeProjectile
     {
         private const int StateSeek = 0;
         private const int StateLatched = 1;
