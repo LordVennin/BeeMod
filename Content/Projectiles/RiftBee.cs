@@ -17,7 +17,7 @@ namespace VenninBeeMod.Content.Projectiles
     public class RiftBee : ModProjectile, IBeeProjectile
     {
         // Fire interval walks from the slow end to the fast end over ChargeTime.
-        private const float SlowInterval = 14f;
+        private const float SlowInterval = 25f;
         private const float FastInterval = 4f;
 
         /// <summary>
