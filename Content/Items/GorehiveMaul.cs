@@ -1,3 +1,4 @@
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
@@ -12,6 +13,9 @@ namespace VenninBeeMod.Content.Items
     /// </summary>
     public class GorehiveMaul : ModItem
     {
+        /// <summary>Which way the swing in progress was aimed, or 0 between swings.</summary>
+        private int swingDirection;
+
         public override void SetStaticDefaults()
         {
             CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
@@ -37,9 +41,35 @@ namespace VenninBeeMod.Content.Items
             Item.autoReuse = true;
             Item.scale = 1.1f;
 
-            // Lets the player turn mid swing. Without it a heavy 35 tick animation pins you
-            // facing the way you started, so you cannot back away while swinging.
+            // Permits the facing to change during the animation. On its own this makes things
+            // worse - movement then re-faces you every frame - but it stops the game undoing
+            // the facing UseStyle sets below.
             Item.useTurn = true;
+        }
+
+        /// <summary>
+        /// Aims each swing at the cursor and holds it there for the whole animation.
+        /// </summary>
+        /// <remarks>
+        /// Neither value of <see cref="Item.useTurn"/> gets this right on its own. The swing
+        /// inherits whatever facing movement last set, so walking left pinned every swing to the
+        /// left however far right the cursor was. Committing to the cursor on the first frame
+        /// and enforcing it after is what lets you back away from something and still hit it.
+        /// This runs during ItemCheck, which is after movement has had its say, so it wins.
+        /// </remarks>
+        public override void UseStyle(Player player, Rectangle heldItemFrame)
+        {
+            if (player.whoAmI != Main.myPlayer)
+            {
+                return;
+            }
+
+            if (player.itemAnimation >= player.itemAnimationMax - 1 || swingDirection == 0)
+            {
+                swingDirection = Main.MouseWorld.X > player.MountedCenter.X ? 1 : -1;
+            }
+
+            player.direction = swingDirection;
         }
 
         public override void OnHitNPC(Player player, NPC target, NPC.HitInfo hit, int damageDone)
