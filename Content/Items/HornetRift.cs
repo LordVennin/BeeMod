@@ -14,7 +14,7 @@ namespace VenninBeeMod.Content.Items
         /// Mana per use cycle. Three cycles a second works out to roughly the 18 a second the
         /// channel was always meant to cost, and vanilla charges it without the drone having to.
         /// </summary>
-        private const int BaseManaCost = 12;
+        private const int BaseManaCost = 13;
 
         public override void SetStaticDefaults()
         {
