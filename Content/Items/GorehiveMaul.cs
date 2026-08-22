@@ -19,7 +19,7 @@ namespace VenninBeeMod.Content.Items
 
         public override void SetDefaults()
         {
-            Item.damage = 26;
+            Item.damage = 28;
             Item.DamageType = DamageClass.Melee;
 
             // Matches the texture. Held items are placed from the unscaled frame size, so the
