@@ -11,8 +11,9 @@ namespace VenninBeeMod.Content.Items
     public class HornetRift : ModItem
     {
         /// <summary>
-        /// Mana per use cycle. Three cycles a second works out to roughly the 18 a second the
-        /// channel was always meant to cost, and vanilla charges it without the drone having to.
+        /// Mana per use cycle. The staff runs three cycles a second while held, so this is a
+        /// third of what holding the channel actually costs per second. Vanilla charges it as
+        /// part of the use, which is also what the drone reads as proof it is still paid for.
         /// </summary>
         private const int BaseManaCost = 13;
 
