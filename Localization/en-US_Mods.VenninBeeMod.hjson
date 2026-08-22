@@ -14,6 +14,44 @@ Items: {
 		Tooltip: Dry, holed and faintly buzzing. Still carries the rot
 	}
 
+	Prismwax: {
+		DisplayName: Prismwax
+		Tooltip: Comb that set into crystal when the Hallow took the hive
+	}
+
+	FracturedStinger: {
+		DisplayName: Fractured Stinger
+		Tooltip: Split clean through, and sharper for it
+	}
+
+	NectarLash: {
+		DisplayName: Nectar Lash
+		Tooltip:
+			'''
+			Coats what it strikes in nectar and sends your minions after it
+			Your bees hit coated enemies harder, and they move slower for wearing it
+			Hold the swing to feed the cord and reach further
+			'''
+	}
+
+	PrismhiveBeacon: {
+		DisplayName: Prismhive Beacon
+		Tooltip:
+			'''
+			Plants a crystal hive wherever you point it
+			Its shards refract into three on the way out, and it lets a bee go now and then
+			'''
+	}
+
+	Combcaster: {
+		DisplayName: Combcaster
+		Tooltip:
+			'''
+			Lobs a comb that sticks where it lands and spits bees at anything near it
+			Three combs at a time; a fourth retires the oldest
+			'''
+	}
+
 	RotweaveShroud: {
 		DisplayName: Rotweave Shroud
 		Tooltip:
@@ -278,6 +316,11 @@ Items: {
 }
 
 Buffs: {
+	NectarTag: {
+		DisplayName: Nectar Coated
+		Description: Slowed, and your bees are hitting it harder
+	}
+
 	BloodgorgerBuff: {
 		DisplayName: Bloodgorger
 		Description: A parasite is feeding on your behalf
@@ -351,11 +394,18 @@ Projectiles: {
 	HemoboreBarb.DisplayName: Hemobore Barb
 	BroodCyst.DisplayName: Brood Cyst
 	BloodgorgerMinion.DisplayName: Bloodgorger
+	PrismBee.DisplayName: Prism Bee
+	PrismStinger.DisplayName: Prism Shard
+	PrismShard.DisplayName: Prism Shard
+	PrismhiveSentry.DisplayName: Prismhive
+	CombTurret.DisplayName: Comb
+	NectarLashProjectile.DisplayName: Nectar Lash
 }
 
 Mods.VenninBeeMod.Tiles.FallingTreeHiveTile.MapEntry: Falling Tree Hive
 Tiles.TreeHiveTile.MapEntry: Tree Hive Tile
 NPCs.StickyResinBee.DisplayName: Sticky Resin Bee
 NPCs.TheSwarm.DisplayName: The Swarm
+NPCs.PrismDrone.DisplayName: Prism Drone
 NPCs.SwarmBeeMinion.DisplayName: Swarm Bee
 NPCs.SkeletonBee.DisplayName: Skeleton Bee
